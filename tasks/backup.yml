@@ -1,0 +1,23 @@
+---
+- name: prepare | dependencies
+  apt:
+    update_cache: yes
+    name:
+      - p7zip-full
+      - snapd
+
+- name: prepare | snap powershell
+  community.general.snap:
+    name:
+      - powershell
+
+- name: prepare | copy PS scripts
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: u+rwx,g=,o=
+  with_items: 
+    - { src: postgre_wal_read.ps1, dest: /usr/local/bin/postgre_wal_read.ps1 }
+    - { src: postgre_wal_write.ps1, dest: /usr/local/bin/postgre_wal_write.ps1 }
