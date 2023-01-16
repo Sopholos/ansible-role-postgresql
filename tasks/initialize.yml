@@ -20,11 +20,25 @@
   register: pgdata_dir_version
 
 - name: Ensure PostgreSQL database is initialized.
-  command: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
-  when: not pgdata_dir_version.stat.exists
-  become: true
-  become_user: "{{ postgresql_user }}"
-  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  command: >
+    pg_createcluster -d {{ postgresql_data_dir }} {{ postgresql_version }} main
+  when: not pgdata_dir_version.stat.exists and postgresql_wal_dir is not defined
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Ensure PostgreSQL WAL directory exists.
+  file:
+    path: "{{ postgresql_wal_dir }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    state: directory
+    mode: 0700
+  when: postgresql_wal_dir is defined
+
+- name: Ensure PostgreSQL database is initialized (using wal).
+  command: >
+    pg_createcluster -d {{ postgresql_data_dir }} {{ postgresql_version }} main -- -X {{ postgresql_wal_dir }}
+  when: not pgdata_dir_version.stat.exists and postgresql_wal_dir is defined
   vars:
     ansible_ssh_pipelining: true
 
