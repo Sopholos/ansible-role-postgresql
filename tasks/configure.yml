@@ -2,9 +2,10 @@
 - name: Configure global settings.
   lineinfile:
     dest: "{{ postgresql_config_path }}/postgresql.conf"
-    regexp: "^#?{{ item.option }}\\s*=.+$"
-    line: "{{ item.option }} = {{ item.value }}"
+    regexp: '^(?P<option>#?{{ item.option }})[\t ]*=[\t ]*((?P<value>[^\n#]+)|(?P<value2>.*?)(?P<comment>[\t ]+#.+))$'
+    line: '{{ item.option }} = {{ item.value }}\g<comment>'
     state: "{{ item.state | default('present') }}"
+    backrefs: yes
     mode: 0644
   with_items: "{{ postgresql_global_config_options }}"
   notify: restart postgresql
