@@ -17,7 +17,7 @@
     dest: "{{ item.dest }}"
     owner: root
     group: root
-    mode: u+rwx,g=,o=
+    mode: u+rwx,g=rx,o=rx
   with_items: 
     - { src: postgre_wal_read.ps1, dest: /usr/local/bin/postgre_wal_read.ps1 }
     - { src: postgre_wal_write.ps1, dest: /usr/local/bin/postgre_wal_write.ps1 }

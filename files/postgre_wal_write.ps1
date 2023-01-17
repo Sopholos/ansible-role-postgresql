@@ -13,12 +13,12 @@ $backwal = $BackupPath
 try
 {
     if (-not (Test-Path -Path $backwal -PathType Container)) {
-        mkdir $backwal
+        New-Item -ItemType Directory $backwal
     }
 
 	$destination = Join-Path $backwal -ChildPath $ArchiveName    
     Copy-Item -Path $ArchiveFullPath -Destination $destination
-	    
+
 	$doneFile = "${destination}.done"
 	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
 }
