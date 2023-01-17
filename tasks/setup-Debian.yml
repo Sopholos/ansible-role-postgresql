@@ -10,6 +10,28 @@
 - name: Add Postgres repo to sources list
   apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main' state=present
 
+# https://askubuntu.com/questions/1392214/is-there-a-way-to-install-postgresql-using-apt-get-without-it-running-initdb-aut
+# Or create the directory /etc/postgresql/$VERSION before the postgresql-$VERSION package gets installed. The existence of this directory will make the post-installation script skip the creation of a default cluster.
+
+- name: Ensure postgresql-common package is installed.
+  apt:
+    name: postgresql-common
+    state: present
+    update_cache: true
+
+- name: Configure postgresql-common
+  ini_file:
+    path: /etc/postgresql-common/createcluster.conf
+    section: ""
+    option: create_main_cluster
+    value: off
+    state: present    
+  
+# - name: Ensure /etc/postgresql/$VERSION/main directory exists to disable cluster autoinit.
+#   file:
+#     path: "/etc/postgresql/{{ postgresql_version }}/main"    
+#     state: directory
+
 - name: Ensure PostgreSQL packages are installed.
   apt:
     name: "{{ postgresql_packages }}"
