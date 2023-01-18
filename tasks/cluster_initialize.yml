@@ -1,0 +1,20 @@
+---
+- set_fact:
+    cluster_init_command: "pg_createcluster -d {{ postgresql_data_dir }} {{ postgresql_version }} main"
+
+- set_fact:
+    cluster_init_command: "{{ cluster_init_command }} -locale={{ postgresql_cluster_init_locale }}"
+  when: postgresql_cluster_init_locale is defined
+
+- set_fact:
+    cluster_init_command: "{{ cluster_init_command }} --lc-messages={{ postgresql_cluster_init_lc_messages }}"
+  when: postgresql_cluster_init_lc_messages is defined
+
+- set_fact:
+    cluster_init_command: "{{ cluster_init_command }} -- -X {{ postgresql_wal_dir }}"
+  when: postgresql_wal_dir is defined
+
+- name: Ensure PostgreSQL database is initialized.
+  command: "{{ cluster_init_command }}"
+  vars:
+    ansible_ssh_pipelining: true

@@ -1,0 +1,73 @@
+---
+- name: Add password to .pgpass
+  lineinfile:
+    line: "{{ postgresql_primary.host }}:{{ postgresql_primary.port }}:replication:{{ postgresql_primary.user }}:{{ postgresql_primary.password }}"
+    regexp: "{{ postgresql_primary.host }}:{{ postgresql_primary.port }}:replication:{{ postgresql_primary.user }}"
+    dest: ~/.pgpass
+    create: yes
+    mode: 0600
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+
+- name: Ensure PostgreSQL cluster backup dir exist.
+  file:
+    path: "{{ postgresql_pg_basebackup_dir }}"
+    state: directory
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+
+- name: Check if PostgreSQL cluster backup exists already
+  stat:
+    path: "{{ postgresql_pg_basebackup_dir }}/standby.signal"
+  register: postgresql_pg_basebackup_standby
+
+- name: Run pg_basebackup, backing up pgbase_host to postgresql_pg_basebackup_dir
+  command: >
+    pg_basebackup --progress \
+      --username={{ postgresql_primary.user }}
+      --write-recovery-conf \
+      --pgdata={{ postgresql_pg_basebackup_dir }} \
+      --wal-method=stream \
+      --format=plain \
+      --checkpoint=fast \
+      --host={{ postgresql_primary.host }} \
+      --port={{ postgresql_primary.port }}
+  when: not postgresql_pg_basebackup_standby.stat.exists
+
+- name: Check if PostgreSQL cluster config exists already
+  stat:
+    path: "{{ postgresql_config_path }}/postgresql.conf"
+  register: postgresql_cluster_postgresql_conf
+
+- name: initialize blank cluster
+  include_tasks: cluster_initialize.yml
+  when: not postgresql_cluster_postgresql_conf.stat.exists
+
+- name: Cleanup cluster files
+  shell: |
+    objs=$(find -L {{ postgresql_data_dir }}/ -type f)
+    if test "$objs"
+    then
+      rm -r $objs
+    else
+      echo "\$objs is empty"
+    fi
+    objs=$(find -L {{ postgresql_data_dir }}/ -maxdepth 1 | grep -v pg_wal$ | grep -v /$)
+    if test "$objs"
+    then
+      rm -r $objs
+    else
+      echo "\$objs is empty"
+    fi
+
+- name: Restore backup files
+  shell: |
+    pwsh -Command "Get-ChildItem {{ postgresql_pg_basebackup_dir }}/ -Recurse | Move-Item -Destination {{ postgresql_data_dir }}"
+
+- name: Set file ownership
+  file:
+    path: "{{ postgresql_data_dir }}"
+    recurse: yes
+    state: directory
+    owner: postgres
+    group: postgres

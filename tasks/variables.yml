@@ -34,6 +34,16 @@
     postgresql_daemon: "{{ __postgresql_daemon }}"
   when: postgresql_daemon is not defined
 
+- name: Define postgresql_home_dir.
+  set_fact:
+    postgresql_home_dir: "{{ __postgresql_home_dir }}"
+  when: postgresql_home_dir is not defined
+
+- name: Define postgresql_pg_basebackup_dir.
+  set_fact:
+    postgresql_pg_basebackup_dir: "{{ __postgresql_pg_basebackup_dir }}"
+  when: postgresql_pg_basebackup_dir is not defined
+
 - name: Define postgresql_data_dir.
   set_fact:
     postgresql_data_dir: "{{ __postgresql_data_dir }}"
