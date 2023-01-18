@@ -35,9 +35,3 @@
     group: "{{ postgresql_group }}"
     state: directory
     mode: 0700
-
-- include_tasks: cluster_initialize.yml
-  when: not pgdata_dir_version.stat.exists and postgresql_role == 'primary'
-
-- include_tasks: cluster_copy.yml
-  when: not pgdata_dir_version.stat.exists and postgresql_role == 'secondary'
