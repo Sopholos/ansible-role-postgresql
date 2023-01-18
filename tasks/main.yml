@@ -3,7 +3,6 @@
 - include_tasks: variables.yml
 
 - include_tasks: backup.yml
-  when: postgresql_wal_archive_enabled is defined and postgresql_wal_archive_enabled | bool == True
 
 # Setup/install tasks.
 - include_tasks: setup-RedHat.yml
