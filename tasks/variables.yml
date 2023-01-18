@@ -29,6 +29,11 @@
     postgresql_version: "{{ __postgresql_version }}"
   when: postgresql_version is not defined
 
+- name: Define postgresql_daemon_cluster.
+  set_fact:
+    postgresql_daemon_cluster: "{{ __postgresql_daemon_cluster }}"
+  when: postgresql_daemon_cluster is not defined
+
 - name: Define postgresql_daemon.
   set_fact:
     postgresql_daemon: "{{ __postgresql_daemon }}"
