@@ -16,9 +16,8 @@
 - block:
   - include_tasks: cluster_initialize.yml
     when: not pgdata_dir_version.stat.exists
-
+  - include_tasks: configure.yml
   - include_tasks: service.yml
-  # Configure PostgreSQL.
   - import_tasks: users.yml
   - import_tasks: databases.yml
   - import_tasks: users_props.yml
@@ -26,8 +25,10 @@
 
 - block:
   - include_tasks: cluster_copy.yml
+    when: not pgdata_dir_version.stat.exists
+  - include_tasks: configure.yml
   - include_tasks: service.yml
-  when: not pgdata_dir_version.stat.exists and postgresql_role == 'secondary'
+  when: postgresql_role == 'secondary'
 
 - name: Ensure PostgreSQL is started and enabled on boot.
   service:

@@ -18,5 +18,3 @@
   command: "{{ cluster_init_command }}"
   vars:
     ansible_ssh_pipelining: true
-
-- include_tasks: configure.yml
