@@ -4,7 +4,7 @@ __postgresql_version: "{{ postgresql_version | default('14') }}"
 __postgresql_data_dir: "{{ postgresql_data_dir | default('{{ __postgresql_home_dir}}/{{ __postgresql_version }}/main') }}"
 __postgresql_pg_basebackup_dir: "{{ postgresql_pg_basebackup_dir | default('{{ __postgresql_home_dir}}/pg_basebackup_dir') }}"
 __postgresql_bin_path: "{{ postgresql_bin_path | default('/usr/lib/postgresql/{{ __postgresql_version }}/bin') }}"
-__postgresql_config_path: "/etc/postgresql/{{ __postgresql_version }}/main"
+__postgresql_config_path: "{{ postgresql_config_path | default('/etc/postgresql/{{ __postgresql_version }}/main') }}"
 __postgresql_daemon_cluster: "postgresql"
 __postgresql_daemon: "{{ __postgresql_daemon_cluster }}@{{ postgresql_version }}-main"
 __postgresql_packages:

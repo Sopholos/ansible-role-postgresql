@@ -63,6 +63,13 @@
   shell: |
     pwsh -Command "Get-ChildItem {{ postgresql_pg_basebackup_dir }}/ -Recurse | Move-Item -Destination {{ postgresql_data_dir }}"
 
+- name: Create standby.signal
+  copy:
+    content: ""
+    dest: "{{ postgresql_data_dir }}/standby.signal"
+    force: false
+  when: postgresql_version != '9.6'
+
 - name: Set file ownership
   file:
     path: "{{ postgresql_data_dir }}"

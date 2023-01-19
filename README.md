@@ -45,10 +45,8 @@ The directories (usually one, but can be multiple) where PostgreSQL's socket wil
 Control the state of the postgresql service and whether it should start at boot time.
 
     postgresql_global_config_options:
-      - option: unix_socket_directories
-        value: '{{ postgresql_unix_socket_directories | join(",") }}'
-      - option: log_directory
-        value: 'log'
+      unix_socket_directories: '{{ postgresql_unix_socket_directories | join(",") }}'
+      log_directory: 'log'
 Global configuration options that will be set in `postgresql.conf`.
 For PostgreSQL versions older than 9.3 you need to at least override this variable and set the `option` to `unix_socket_directory`.
 If you override the value of `option: log_directory` with another path, relative or absolute, then this role will create it for you. 

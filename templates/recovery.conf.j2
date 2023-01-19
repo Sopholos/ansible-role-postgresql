@@ -1,0 +1,9 @@
+{{ ansible_managed | comment }}
+# -------------------------------
+# PostgreSQL recovery config file
+# -------------------------------
+# See: https://www.postgresql.org/docs/9.6/recovery-config.html
+
+{% for item in lookup('dict', recovery_conf) %}
+{{ item.key }} = {{ item.value }}
+{% endfor %}

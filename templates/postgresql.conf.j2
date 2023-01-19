@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+# -----------------------------
+# PostgreSQL configuration file
+# -----------------------------
+# See: https://www.postgresql.org/docs/current/config-setting.html
+
+{% for item in lookup('dict', postgresql_global_config_options) %}
+{% if postgresql_version == '9.6'  
+and (
+    item.key == 'hash_mem_multiplier' or
+    item.key == 'restore_command' or
+    item.key == 'primary_conninfo' or
+    item.key == 'promote_trigger_file'
+) %}{# ignoring new config keys, not recognized by 9.6 #}{% else  %}
+{{ item.key }} = {{ item.value }}
+{% endif %}
+{% endfor %}
