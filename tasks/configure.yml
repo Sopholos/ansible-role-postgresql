@@ -10,6 +10,16 @@
   with_items: "{{ postgresql_global_config_options }}"
   notify: restart postgresql
 
+- name: Add password to .pgpass for postgresql_user
+  lineinfile:
+    line: "{{ postgresql_primary.host }}:{{ postgresql_primary.port }}:replication:{{ postgresql_primary.user }}:{{ postgresql_primary.password }}"
+    regexp: "{{ postgresql_primary.host }}:{{ postgresql_primary.port }}:replication:{{ postgresql_primary.user }}"
+    dest: "{{ postgresql_home_dir }}/.pgpass"
+    create: yes
+    mode: 0600
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+
 - name: Configure host based authentication (if entries are configured).
   template:
     src: "pg_hba.conf.j2"

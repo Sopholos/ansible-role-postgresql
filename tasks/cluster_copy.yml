@@ -25,7 +25,6 @@
   command: >
     pg_basebackup --progress \
       --username={{ postgresql_primary.user }}
-      --write-recovery-conf \
       --pgdata={{ postgresql_pg_basebackup_dir }} \
       --wal-method=stream \
       --format=plain \
