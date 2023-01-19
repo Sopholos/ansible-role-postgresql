@@ -1,7 +1,7 @@
 ---
 - name: Configure global settings.
   lineinfile:
-    dest: "{{ postgresql_config_path }}/postgresql.conf"
+    path: "{{ postgresql_config_path }}/postgresql.conf"
     regexp: '^(?P<option>#?{{ item.option }})[\t ]*=[\t ]*((?P<value>[^\n#]+)|(?P<value2>.*?)(?P<comment>[\t ]+#.+))$'
     line: '{{ item.option }} = {{ item.value }}\g<comment>'
     state: "{{ item.state | default('present') }}"
@@ -9,6 +9,74 @@
     mode: 0644
   with_items: "{{ postgresql_global_config_options }}"
   notify: restart postgresql
+  register: postgresql_conf_changes
+
+- name: postgresql_conf_changes print
+  debug:
+    var: postgresql_conf_changes
+
+- name: Configure postgresql.conf settings that missed in file
+  lineinfile:
+    path: "{{ postgresql_config_path }}/postgresql.conf"
+    line: '{{ item.item.option }} = {{ item.item.value }}'
+    state: "{{ item.state | default('present') }}"
+    mode: 0644
+  with_items: "{{ postgresql_conf_changes.results }}"
+  when: not item.changed
+  notify: restart postgresql
+
+- block:
+  - name: Construct recovery.conf dictionary
+    set_fact:
+      postgresql_recovery_config_dict: "{{ (postgresql_global_config_options | items2dict(key_name='option', value_name='value')) }}"
+  
+  - name: Check if recovery.conf exists
+    stat:
+      path: "{{ postgresql_data_dir }}/recovery.conf"
+    register: recoveryconf
+
+  - name: Create empty file recovery.conf
+    file:
+      path: "{{ postgresql_data_dir }}/recovery.conf"
+      state: touch
+    when: recoveryconf.stat.isreg is not defined
+
+  - name: Configure recovery.conf settings
+    lineinfile:
+      path: "{{ postgresql_data_dir }}/recovery.conf"
+      regexp: '^(?P<option>#?{{ item.option }})[\t ]*=[\t ]*((?P<value>[^\n#]+)|(?P<value2>.*?)(?P<comment>[\t ]+#.+))$'
+      line: '{{ item.option }} = {{ item.value }}\g<comment>'
+      state: "{{ item.state | default('present') }}"
+      backrefs: yes
+      mode: 0644
+    with_items:
+      - { option: 'restore_command', value: "{{ postgresql_recovery_config_dict.restore_command }}" }
+      - { option: 'standby_mode', value: 'on' }
+      - { option: 'primary_conninfo', value: "{{ postgresql_recovery_config_dict.primary_conninfo }}" }
+      - { option: 'trigger_file', value: "{{ postgresql_recovery_config_dict.promote_trigger_file }}" }
+    notify: restart postgresql
+    register: recovery_conf_changes
+
+  # - name: recovery_conf_changes print
+  #   debug:
+  #     var: recovery_conf_changes
+
+  - name: Configure recovery.conf settings that missed in file
+    lineinfile:
+      path: "{{ postgresql_data_dir }}/recovery.conf"
+      line: '{{ item.item.option }} = {{ item.item.value }}'
+      state: "{{ item.state | default('present') }}"
+      mode: 0644
+    with_items: "{{ recovery_conf_changes.results }}"
+    when: not item.changed
+    notify: restart postgresql
+  #   register: recovery_conf_changes2
+
+  # - name: recovery_conf_changes2 print
+  #   debug:
+  #     var: recovery_conf_changes2
+
+  when: postgresql_role == 'secondary' and postgresql_version == '9.6'
 
 - name: Add password to .pgpass for postgresql_user
   lineinfile:
