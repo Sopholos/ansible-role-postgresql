@@ -32,11 +32,24 @@
 #     path: "/etc/postgresql/{{ postgresql_version }}/main"    
 #     state: directory
 
-- name: Ensure PostgreSQL packages are installed.
+- name: Ensure PostgreSQL packages are installed
   apt:
     name: "{{ postgresql_packages }}"
     state: present
     update_cache: true
+
+- name: add ubuntugis ppa
+  apt_repository: repo=ppa:ubuntugis/ubuntugis-unstable state=present
+  when: postgresql_postgis is defined
+
+- name: PostGIS packages
+  apt:
+    name: 
+      - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}"
+      - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}-scripts"
+    state: present
+  when: postgresql_postgis is defined and postgresql_postgis.version is defined
+  notify: restart postgresql
 
 - name: Configure locale aliases
   lineinfile:
