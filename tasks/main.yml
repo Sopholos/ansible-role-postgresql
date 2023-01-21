@@ -30,8 +30,4 @@
   - include_tasks: service.yml
   when: postgresql_role == 'secondary'
 
-- name: Ensure PostgreSQL is started and enabled on boot.
-  service:
-    name: "{{ postgresql_daemon }}"
-    state: "{{ postgresql_service_state }}"
-    enabled: "{{ postgresql_service_enabled }}"
+- include_tasks: configure_service.yml

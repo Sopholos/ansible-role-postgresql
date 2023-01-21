@@ -1,0 +1,17 @@
+---
+- name: Configuire PostgreSQL systemd
+  ini_file:
+    path: /lib/systemd/system/postgresql@.service
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+    no_extra_spaces: yes
+  with_items: "{{ postgresql_systemd }}"
+  notify: restart postgresql
+
+- name: Ensure PostgreSQL is started and enabled on boot.
+  service:
+    name: "{{ postgresql_daemon }}"
+    state: "{{ postgresql_service_state }}"
+    enabled: "{{ postgresql_service_enabled }}"
