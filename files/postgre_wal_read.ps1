@@ -12,29 +12,6 @@ param(
 $ErrorActionPreference = "Stop"
 $backwal = $BackupPath
 
-function Start-ProcessOutputAsBinary([string]$processname, [string]$arguments) {
-	$processStartInfo = New-Object System.Diagnostics.ProcessStartInfo
-	$processStartInfo.FileName = $processname
-	$processStartInfo.WorkingDirectory = (Get-Location).Path
-	if($arguments) { $processStartInfo.Arguments = $arguments }
-	$processStartInfo.UseShellExecute = $false
-	$processStartInfo.RedirectStandardOutput = $true
-
-	$process = [System.Diagnostics.Process]::Start($processStartInfo)
-	
-	$byteRead = -1
-    do
-    {
-        $byteRead = $process.StandardOutput.BaseStream.ReadByte()
-        if($byteRead -ge 0) { $byteRead }
-    } while($byteRead -ge 0)	
-
-	$process.WaitForExit()
-	if ($process.ExitCode -ne 0) {	
-		throw "failed to start: $($process.ExitCode) $processname $arguments"
-	}
-}
-
 function Expand-7ZipItem {
 	param(
 		[parameter(Mandatory=$true)]
@@ -48,8 +25,8 @@ function Expand-7ZipItem {
 	try
 	{
         $7zipPath = "/usr/lib/p7zip/7z"
-		$exeargs = "x ""$Source"""	
 		if (Test-Path -Path $Target -PathType Container) {
+			$exeargs = "x ""$Source"""
 			$exeargs = "$exeargs -o""$Target"" $UnComressionArgs"
 			$process = Start-Process $7zipPath -Wait -NoNewWindow -PassThru -ArgumentList $exeargs
 			
@@ -58,9 +35,26 @@ function Expand-7ZipItem {
 			}
 		}
 		else {
-			$exeargs = "$exeargs -so $UnComressionArgs"
-			$bytes = Start-ProcessOutputAsBinary $7zipPath $exeargs 
-			[io.file]::WriteAllBytes($Target, $bytes)
+			$tmpdst =  "/tmp/wal_copy"
+			[System.IO.File]::Copy($Source, $tmpdst, $true);
+			$Source = $tmpdst
+
+			$tmpfold =  "/tmp/wal_copy_ex"
+			if (-not (Test-Path -Path $tmpfold -PathType Container)) {
+				New-Item -ItemType Directory $tmpfold
+			}
+
+			$exeargs = "x ""$Source"""
+			$exeargs = "$exeargs -o""$tmpfold"" $UnComressionArgs -aoa"
+			$process = Start-Process $7zipPath -Wait -NoNewWindow -PassThru -ArgumentList $exeargs
+			
+			if ($process.ExitCode -ne 0) {	
+				throw "7zip failed to uncompress file: $($process.ExitCode) $exeargs"
+			}
+
+			$Source = Join-Path $tmpfold $ArchiveName
+
+			[System.IO.File]::Move($Source, $Target, $true);
 		}
 	}
 	catch {
