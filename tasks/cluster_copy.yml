@@ -20,6 +20,13 @@
   stat:
     path: "{{ postgresql_pg_basebackup_dir }}/standby.signal"
   register: postgresql_pg_basebackup_standby
+  when: postgresql_version != '9.6'
+
+- name: Check if PostgreSQL cluster backup exists already 9.6
+  stat:
+    path: "{{ postgresql_pg_basebackup_dir }}/PG_VERSION"
+  register: postgresql_pg_basebackup_standby
+  when: postgresql_version == '9.6'
 
 - name: Run pg_basebackup, backing up pgbase_host to postgresql_pg_basebackup_dir
   command: >
