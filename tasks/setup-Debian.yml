@@ -38,6 +38,15 @@
     state: present
     update_cache: true
 
+- name: Configure locale aliases
+  lineinfile:
+    dest: /etc/locale.alias
+    regexp: "^{{ item.alias }}\\s+.+$"
+    line: "{{ item.alias }} {{ item.locale }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ postgresql_locale_aliases }}"
+  notify: restart postgresql
+
 - name: Ensure all configured locales are present.
   locale_gen: "name={{ item }} state=present"
   with_items: "{{ postgresql_locales }}"
