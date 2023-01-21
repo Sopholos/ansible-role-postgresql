@@ -12,11 +12,27 @@ param(
 $ErrorActionPreference = "Stop"
 $backwal = $BackupPath
 
-function Start-ProcessSimple([string]$exe, [string]$exeargs) {
-	$process = Start-Process $exe -Wait -NoNewWindow -PassThru -ArgumentList $exeargs
-	if ($process.ExitCode -ne 0) {
-		throw "Failed to start: $($process.ExitCode) $exe $exeargs"
-	}	
+function Start-ProcessOutputAsBinary([string]$processname, [string]$arguments) {
+	$processStartInfo = New-Object System.Diagnostics.ProcessStartInfo
+	$processStartInfo.FileName = $processname
+	$processStartInfo.WorkingDirectory = (Get-Location).Path
+	if($arguments) { $processStartInfo.Arguments = $arguments }
+	$processStartInfo.UseShellExecute = $false
+	$processStartInfo.RedirectStandardOutput = $true
+
+	$process = [System.Diagnostics.Process]::Start($processStartInfo)
+	
+	$byteRead = -1
+    do
+    {
+        $byteRead = $process.StandardOutput.BaseStream.ReadByte()
+        if($byteRead -ge 0) { $byteRead }
+    } while($byteRead -ge 0)	
+
+	$process.WaitForExit()
+	if ($process.ExitCode -ne 0) {	
+		throw "failed to start: $($process.ExitCode) $processname $arguments"
+	}
 }
 
 function Expand-7ZipItem {
@@ -31,11 +47,7 @@ function Expand-7ZipItem {
 
 	try
 	{
-        $7zipPath = "7z"
-		if (-not (Test-Path -Path $7zipPath -PathType Leaf)) {
-			throw "7zip file '$7zipPath' not found"
-		}
-		
+        $7zipPath = "/usr/lib/p7zip/7z"
 		$exeargs = "x ""$Source"""	
 		if (Test-Path -Path $Target -PathType Container) {
 			$exeargs = "$exeargs -o""$Target"" $UnComressionArgs"
@@ -47,11 +59,8 @@ function Expand-7ZipItem {
 		}
 		else {
 			$exeargs = "$exeargs -so $UnComressionArgs"
-			$process = Start-Process $7zipPath -Wait -NoNewWindow -PassThru -ArgumentList $exeargs -RedirectStandardOutput $Target
-			
-			if ($process.ExitCode -ne 0) {	
-				throw "7zip failed to uncompress file: $($process.ExitCode) $exeargs to $Target"
-			}
+			$bytes = Start-ProcessOutputAsBinary $7zipPath $exeargs 
+			[io.file]::WriteAllBytes($Target, $bytes)
 		}
 	}
 	catch {
