@@ -49,6 +49,14 @@
   include_tasks: cluster_initialize.yml
   when: not postgresql_cluster_postgresql_conf.stat.exists
 
+- set_fact:
+  pg_wal_folder: pg_wal
+  when: postgresql_version != '9.6'
+
+  - set_fact:
+  pg_wal_folder: pg_xlog
+  when: postgresql_version == '9.6'
+
 - name: Cleanup cluster files
   shell: |
     objs=$(find -L {{ postgresql_data_dir }}/ -type f)
@@ -58,7 +66,7 @@
     else
       echo "\$objs is empty"
     fi
-    objs=$(find -L {{ postgresql_data_dir }}/ -maxdepth 1 | grep -v pg_wal$ | grep -v /$)
+    objs=$(find -L {{ postgresql_data_dir }}/ -maxdepth 1 | grep -v {{ pg_wal_folder }}$ | grep -v /$)
     if test "$objs"
     then
       rm -r $objs
