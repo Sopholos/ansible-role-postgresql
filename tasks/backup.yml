@@ -10,6 +10,7 @@
   community.general.snap:
     name:
       - powershell
+    classic: true
 
 - name: prepare | copy PS scripts
   copy:
