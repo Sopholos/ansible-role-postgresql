@@ -22,15 +22,27 @@
   register: postgresql_pg_basebackup_standby
 
 - name: Run pg_basebackup, backing up pgbase_host to postgresql_pg_basebackup_dir
-  command: >
+  shell: >
     pg_basebackup --progress \
-      --username={{ postgresql_primary.user }}
+      --username={{ postgresql_primary.user }} \
       --pgdata={{ postgresql_pg_basebackup_dir }} \
       --wal-method=stream \
       --format=plain \
       --checkpoint=fast \
       --host={{ postgresql_primary.host }} \
       --port={{ postgresql_primary.port }}
+  async: 300000
+  poll: 0
+  register: pg_basebackup_sleeper
+  when: not postgresql_pg_basebackup_standby.stat.exists
+
+- name: pg_basebackup - check on async task
+  async_status:
+    jid: "{{ pg_basebackup_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 1000000
+  delay: 30
   when: not postgresql_pg_basebackup_standby.stat.exists
 
 - name: Check if PostgreSQL cluster config exists already
