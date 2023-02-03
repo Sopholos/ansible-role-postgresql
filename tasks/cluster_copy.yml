@@ -33,19 +33,6 @@
       --port={{ postgresql_primary.port }}
   when: not postgresql_pg_basebackup_standby.stat.exists
 
-- name: Get backup version
-  ansible.builtin.slurp:
-    src: "{{ postgresql_pg_basebackup_dir }}/PG_VERSION"
-  register: postgresql_backup_version_encoded
-
-- set_fact:
-    postgre_backup_version: "{{ postgresql_backup_version_encoded['content'] | b64decode | trim }}"
-
-- name: Halt when version not equals
-  fail:
-    msg: "Backup version {{ postgre_backup_version }} not equals to installed postgre version {{ postgresql_version }}"
-  when: postgre_backup_version != postgresql_version
-
 - name: Check if PostgreSQL cluster config exists already
   stat:
     path: "{{ postgresql_config_path }}/postgresql.conf"
@@ -54,6 +41,35 @@
 - name: initialize blank cluster
   include_tasks: cluster_initialize.yml
   when: not postgresql_cluster_postgresql_conf.stat.exists
+
+- name: Renaming PG_VERSION file to exclude cluster treated as initialized
+  block:
+    - name: Copy PG_VERSION to PG_VERSION_BACK
+      copy: 
+        remote_src: true 
+        src: "{{ postgresql_data_dir }}/PG_VERSION"
+        dest: "{{ postgresql_data_dir }}/PG_VERSION_BACK"
+
+    - name: Remove PG_VERSION
+      file: 
+        path: "{{ postgresql_data_dir }}/PG_VERSION"
+        state: absent
+
+  when: not postgresql_cluster_postgresql_conf.stat.exists
+
+- name: Get backup version
+  ansible.builtin.slurp:
+    src: "{{ postgresql_pg_basebackup_dir }}/PG_VERSION"
+  register: postgresql_backup_version_encoded
+
+- name: decoding postgre_backup_version
+  set_fact:
+    postgre_backup_version: "{{ postgresql_backup_version_encoded['content'] | b64decode | trim }}"
+
+- name: Halt when version not equals
+  fail:
+    msg: "Backup version {{ postgre_backup_version }} not equals to installed postgre version {{ postgresql_version }}"
+  when: postgre_backup_version != postgresql_version
 
 - set_fact:
     pg_wal_folder: pg_wal
