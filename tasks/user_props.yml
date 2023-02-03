@@ -1,0 +1,36 @@
+---
+- name: Ensure PostgreSQL users are configured correctly for {{ postgresql_user_item.name }}
+  postgresql_user:
+    name: "{{ postgresql_user_item.name }}"
+    password: "{{ postgresql_user_item.password | default(omit) }}"
+    encrypted: "{{ postgresql_user_item.encrypted | default(omit) }}"
+    priv: "{{ postgresql_user_item.priv | default(omit) }}"
+    role_attr_flags: "{{ postgresql_user_item.role_attr_flags | default(omit) }}"
+    db: "{{ postgresql_user_item.db | default(omit) }}"
+    login_host: "{{ postgresql_user_item.login_host | default('localhost') }}"
+    login_password: "{{ postgresql_user_item.login_password | default(omit) }}"
+    login_user: "{{ postgresql_user_item.login_user | default(postgresql_user) }}"
+    login_unix_socket: "{{ postgresql_user_item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ postgresql_port | default(omit) }}"
+    state: "{{ postgresql_user_item.state | default('present') }}"
+  become: true
+  become_user: "{{ postgresql_user }}"
+  environment:
+    PGOPTIONS: "{{ (postgresql_auth_method == 'scram-sha-256') | ternary('-c password_encryption=scram-sha-256', '') }}"
+
+- name: Ensure PostgreSQL users groups are configured correctly for {{ postgresql_user_item.name }}
+  community.postgresql.postgresql_membership:
+    groups: "{{ item.name }}"
+    state: "{{ item.state | default('present') }}"
+    target_roles: "{{ postgresql_user_item.name }}"
+    login_host: "{{ postgresql_user_item.login_host | default('localhost') }}"
+    login_password: "{{ postgresql_user_item.login_password | default(omit) }}"
+    login_user: "{{ postgresql_user_item.login_user | default(postgresql_user) }}"
+    login_unix_socket: "{{ postgresql_user_item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ postgresql_port | default(omit) }}"
+  with_items: '{{ postgresql_user_item.groups }}'
+  when: postgresql_user_item.groups is defined
+  become: true
+  become_user: "{{ postgresql_user }}"
+  environment:
+    PGOPTIONS: "{{ (postgresql_auth_method == 'scram-sha-256') | ternary('-c password_encryption=scram-sha-256', '') }}"
