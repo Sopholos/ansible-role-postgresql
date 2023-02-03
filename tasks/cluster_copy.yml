@@ -18,15 +18,8 @@
 
 - name: Check if PostgreSQL cluster backup exists already
   stat:
-    path: "{{ postgresql_pg_basebackup_dir }}/standby.signal"
-  register: postgresql_pg_basebackup_standby
-  when: postgresql_version != '9.6'
-
-- name: Check if PostgreSQL cluster backup exists already 9.6
-  stat:
     path: "{{ postgresql_pg_basebackup_dir }}/PG_VERSION"
   register: postgresql_pg_basebackup_standby
-  when: postgresql_version == '9.6'
 
 - name: Run pg_basebackup, backing up pgbase_host to postgresql_pg_basebackup_dir
   command: >
@@ -40,6 +33,19 @@
       --port={{ postgresql_primary.port }}
   when: not postgresql_pg_basebackup_standby.stat.exists
 
+- name: Get backup version
+  ansible.builtin.slurp:
+    src: "{{ postgresql_pg_basebackup_dir }}/PG_VERSION"
+  register: postgresql_backup_version_encoded
+
+- set_fact:
+    postgre_backup_version: "{{ postgresql_backup_version_encoded['content'] | b64decode | trim }}"
+
+- name: Halt when version not equals
+  fail:
+    msg: "Backup version {{ postgre_backup_version }} not equals to installed postgre version {{ postgresql_version }}"
+  when: postgre_backup_version != postgresql_version
+
 - name: Check if PostgreSQL cluster config exists already
   stat:
     path: "{{ postgresql_config_path }}/postgresql.conf"
@@ -50,11 +56,11 @@
   when: not postgresql_cluster_postgresql_conf.stat.exists
 
 - set_fact:
-  pg_wal_folder: pg_wal
+    pg_wal_folder: pg_wal
   when: postgresql_version != '9.6'
 
-  - set_fact:
-  pg_wal_folder: pg_xlog
+- set_fact:
+    pg_wal_folder: pg_xlog
   when: postgresql_version == '9.6'
 
 - name: Cleanup cluster files
