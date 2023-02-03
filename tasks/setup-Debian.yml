@@ -58,6 +58,7 @@
     line: "{{ item.alias }} {{ item.locale }}"
     state: "{{ item.state | default('present') }}"
   with_items: "{{ postgresql_locale_aliases }}"
+  when: postgresql_locale_aliases is defined
   notify: restart postgresql
 
 - name: Ensure all configured locales are present.
