@@ -59,15 +59,21 @@
     state: "{{ item.state | default('present') }}"
   with_items: "{{ postgresql_locale_aliases }}"
   when: postgresql_locale_aliases is defined
-  notify: restart postgresql
+  register: locale_aliases_result
 
 - name: Ensure all configured locales are present.
   locale_gen: "name={{ item }} state=present"
   with_items: "{{ postgresql_locales }}"
   register: locale_gen_result
 
+- name: Register all localedefs
+  shell: >
+    localedef -f {{ item.charmap }} -i {{ item.inputfile }} {{ item.name }}
+  with_items: "{{ postgresql_localedefs }}"
+  when: postgresql_localedefs is defined
+
 - name: Force-restart PostgreSQL after new locales are generated.
   service:
     name: "{{ postgresql_daemon_cluster }}"
     state: restarted
-  when: locale_gen_result.changed
+  when: locale_gen_result.changed or locale_aliases_result.changed
