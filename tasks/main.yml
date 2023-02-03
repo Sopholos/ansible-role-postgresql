@@ -14,20 +14,24 @@
 - include_tasks: initialize.yml
 
 - block:
+  - include_tasks: cluster_copy_and_configure.yml
+  - include_tasks: service.yml
+  - include_tasks: make_primary.yml
+  when: postgresql_role == 'primary_clone'
+
+- block:
   - include_tasks: cluster_initialize.yml
     when: not pgdata_dir_version.stat.exists
   - include_tasks: configure.yml
   - include_tasks: service.yml
+
   - import_tasks: users.yml
   - import_tasks: databases.yml
   - import_tasks: users_props.yml
-  when: postgresql_role == 'primary'
+  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
 - block:
-  - include_tasks: cluster_copy.yml
-    when: not pgdata_dir_version.stat.exists
-  - include_tasks: configure.yml
-  - include_tasks: service.yml
+  - include_tasks: cluster_copy_and_configure.yml
   when: postgresql_role == 'secondary'
 
 - include_tasks: configure_service.yml

@@ -1,0 +1,29 @@
+---
+- name: Check postgresql is in recovery
+  postgresql_query:
+    query: select pg_is_in_recovery()
+    login_host: "{{ item.login_host | default('localhost') }}"
+    login_password: "{{ item.login_password | default(omit) }}"
+    login_user: "{{ item.login_user | default(postgresql_user) }}"
+    login_unix_socket: "{{ item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ postgresql_port | default(omit) }}"
+  register: result
+  become: true
+  become_user: "{{ postgresql_user }}"
+  vars:
+    ansible_ssh_pipelining: true # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+
+- name: "Triggering instance became master"
+  block:
+    - name: Acquiring trigger file path
+      set_fact:
+        trigger_file: "{{ postgresql_global_config_options.promote_trigger_file | regex_replace(\"'\", '') }}"
+
+    - name: Ensure {{ trigger_file }} exists
+      copy:
+        content: ""
+        dest: "{{ trigger_file }}"
+        force: false
+
+  when: result.rowcount == 1
+  when: result.query_result.0.pg_is_in_recovery == true

@@ -1,0 +1,5 @@
+---
+- include_tasks: cluster_copy.yml
+  when: not pgdata_dir_version.stat.exists
+- include_tasks: configure.yml
+- include_tasks: service.yml
