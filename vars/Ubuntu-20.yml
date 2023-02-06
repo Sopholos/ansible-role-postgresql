@@ -1,11 +1,15 @@
 ---
-__postgresql_version: "12"
-__postgresql_data_dir: "/var/lib/postgresql/{{ __postgresql_version }}/main"
-__postgresql_bin_path: "/usr/lib/postgresql/{{ __postgresql_version }}/bin"
-__postgresql_config_path: "/etc/postgresql/{{ __postgresql_version }}/main"
-__postgresql_daemon: postgresql
+__postgresql_home_dir: "{{ postgresql_home_dir | default('/var/lib/postgresql') }}"
+__postgresql_version: "{{ postgresql_version | default('12') }}"
+__postgresql_data_dir: "{{ postgresql_data_dir | default('{{ __postgresql_home_dir}}/{{ __postgresql_version }}/main') }}"
+__postgresql_pg_basebackup_dir: "{{ postgresql_pg_basebackup_dir | default('{{ __postgresql_home_dir}}/pg_basebackup_dir') }}"
+__postgresql_bin_path: "{{ postgresql_bin_path | default('/usr/lib/postgresql/{{ __postgresql_version }}/bin') }}"
+__postgresql_config_path: "{{ postgresql_config_path | default('/etc/postgresql/{{ __postgresql_version }}/main') }}"
+__postgresql_daemon_cluster: "postgresql"
+__postgresql_daemon: "{{ __postgresql_daemon_cluster }}@{{ postgresql_version }}-main"
 __postgresql_packages:
-  - postgresql
+  - "postgresql-{{ postgresql_version }}"
   - postgresql-contrib
   - libpq-dev
 postgresql_python_library: python3-psycopg2
+postgresql_debian_codename: focal
