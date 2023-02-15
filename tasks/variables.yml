@@ -44,6 +44,11 @@
     postgresql_home_dir: "{{ __postgresql_home_dir }}"
   when: postgresql_home_dir is not defined
 
+- name: Define postgresql_cluster_name.
+  set_fact:
+    postgresql_cluster_name: "{{ __postgresql_cluster_name }}"
+  when: postgresql_cluster_name is not defined
+
 - name: Define postgresql_pg_basebackup_dir.
   set_fact:
     postgresql_pg_basebackup_dir: "{{ __postgresql_pg_basebackup_dir }}"

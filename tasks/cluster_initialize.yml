@@ -1,7 +1,7 @@
 ---
 - name: generating cluster_init_command 1
   set_fact:
-    cluster_init_command: "pg_createcluster -d {{ postgresql_data_dir }} {{ postgresql_version }} main"
+    cluster_init_command: "pg_createcluster -d {{ postgresql_data_dir }} {{ postgresql_version }} {{ postgresql_cluster_name }}"
 
 - name: generating cluster_init_command 2
   set_fact:

@@ -25,12 +25,7 @@
     section: ""
     option: create_main_cluster
     value: off
-    state: present    
-  
-# - name: Ensure /etc/postgresql/$VERSION/main directory exists to disable cluster autoinit.
-#   file:
-#     path: "/etc/postgresql/{{ postgresql_version }}/main"    
-#     state: directory
+    state: present
 
 - name: Ensure PostgreSQL packages are installed
   apt:
@@ -44,7 +39,7 @@
 
 - name: PostGIS packages
   apt:
-    name: 
+    name:
       - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}"
       - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}-scripts"
     state: present
