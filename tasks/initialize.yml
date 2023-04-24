@@ -27,4 +27,4 @@
     owner: "{{ postgresql_user }}"
     group: "{{ postgresql_group }}"
     state: directory
-    mode: 0744
+    mode: 0755
