@@ -37,6 +37,7 @@
     mode: 0600
     owner: "{{ postgresql_user }}"
     group: "{{ postgresql_group }}"
+  when: postgresql_primary is defined
 
 - name: Configure host based authentication (if entries are configured).
   template:
