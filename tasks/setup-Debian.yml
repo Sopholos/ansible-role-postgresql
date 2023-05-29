@@ -1,4 +1,13 @@
 ---
+- name: Ensure prerequisites libraries are installed.
+  apt:
+    name:
+      - gnupg
+      - apt-transport-https
+      - wget
+    update_cache: true
+    state: present
+
 - name: Ensure PostgreSQL Python libraries are installed.
   apt:
     name: "{{ postgresql_python_library }}"
@@ -33,18 +42,37 @@
     state: present
     update_cache: true
 
-- name: add ubuntugis ppa
-  apt_repository: repo=ppa:ubuntugis/ubuntugis-unstable state=present
-  when: postgresql_postgis is defined
+- block:
+  - name: Add key for TimescaleDB repo
+    shell: wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo gpg --yes --dearmor -o /etc/apt/trusted.gpg.d/timescaledb.gpg
 
-- name: PostGIS packages
-  apt:
-    name:
-      - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}"
-      - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}-scripts"
-    state: present
-  when: postgresql_postgis is defined and postgresql_postgis.version is defined
-  notify: restart postgresql
+  - name: Add TimescaleDB repo to sources list
+    apt_repository: "repo='deb https://packagecloud.io/timescale/timescaledb/ubuntu/ {{ postgresql_debian_codename }} main' state=present"
+
+  - name: TimescaleDB packages
+    apt:
+      name: "timescaledb-2-postgresql-{{ postgresql_timescaledb.version }}"
+      state: present
+      update_cache: true
+    notify: restart postgresql
+    when: postgresql_timescaledb.version is defined
+
+  when: postgresql_timescaledb is defined
+
+- block:
+  - name: add ubuntugis ppa
+    apt_repository: repo=ppa:ubuntugis/ubuntugis-unstable state=present
+
+  - name: PostGIS packages
+    apt:
+      name:
+        - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}"
+        - "postgresql-{{ postgresql_version }}-postgis-{{ postgresql_postgis.version }}-scripts"
+      state: present
+    when: postgresql_postgis.version is defined
+    notify: restart postgresql
+
+  when: postgresql_postgis is defined
 
 - name: Configure locale aliases
   lineinfile:
