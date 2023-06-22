@@ -13,9 +13,13 @@
     cluster_init_command: "{{ cluster_init_command }} --lc-messages={{ postgresql_cluster_init_lc_messages }}"
   when: postgresql_cluster_init_lc_messages is defined
 
-- name: generating cluster_init_command 4
+- name: generating cluster_init_command initdb params 1
   set_fact:
-    cluster_init_command: "{{ cluster_init_command }} -- -X {{ postgresql_wal_dir }}"
+    cluster_init_command: "{{ cluster_init_command }} -- --data-checksums"
+
+- name: generating cluster_init_command initdb params 2
+  set_fact:
+    cluster_init_command: "{{ cluster_init_command }} -X {{ postgresql_wal_dir }}"
   when: postgresql_wal_dir is defined
 
 - name: Ensure PostgreSQL database is initialized.
