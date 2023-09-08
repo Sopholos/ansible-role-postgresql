@@ -44,6 +44,8 @@
       tags: [ db ]
     - import_tasks: users_props.yml
       tags: [ users ]
+    - import_tasks: dbscripts.yml
+      tags: [ scripts ]
     tags: [ config ]
 
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'

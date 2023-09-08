@@ -1,0 +1,10 @@
+---
+- name: Run SQL Scripts
+  include_tasks: dbscript.yml
+  loop_control:
+     loop_var: postgresql_scripts_item
+  with_items: "{{ postgresql_scripts }}"
+  when: postgresql_scripts is defined
+  #   # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  # vars:
+  #   ansible_ssh_pipelining: true
