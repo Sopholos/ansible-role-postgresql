@@ -51,7 +51,7 @@
   register: postgresql_cluster_postgresql_conf
 
 - name: initialize blank cluster
-  include_tasks: cluster_initialize.yml
+  import_tasks: cluster_initialize.yml
   when: not postgresql_cluster_postgresql_conf.stat.exists
 
 - name: Renaming PG_VERSION file to exclude cluster treated as initialized

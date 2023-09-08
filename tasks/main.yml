@@ -1,40 +1,57 @@
 ---
 # Variable configuration.
-- include_tasks: variables.yml
+- import_tasks: variables.yml
+  tags: [ init ]
 
-- include_tasks: backup.yml
+- import_tasks: backup.yml
+  tags: [ backup ]
 
-- include_tasks: backup_cron.yml
+- import_tasks: backup_cron.yml
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
+  tags: [ backup ]
 
 # Setup/install tasks.
-- include_tasks: setup-RedHat.yml
+- import_tasks: setup-RedHat.yml
   when: ansible_os_family == 'RedHat'
+  tags: [ install ]
 
-- include_tasks: setup-Debian.yml
+- import_tasks: setup-Debian.yml
   when: ansible_os_family == 'Debian'
+  tags: [ install ]
 
-- include_tasks: initialize.yml
+- import_tasks: initialize.yml
+  tags: [ init ]
 
 - block:
-  - include_tasks: cluster_copy_and_configure.yml
-  - include_tasks: service.yml
-  - include_tasks: make_primary.yml
+  - import_tasks: cluster_copy_and_configure.yml
+  - import_tasks: service.yml
+  - import_tasks: make_primary.yml
   when: postgresql_role == 'primary_clone'
+  tags: [ install, cluster ]
 
 - block:
-  - include_tasks: cluster_initialize.yml
-    when: not pgdata_dir_version.stat.exists
-  - include_tasks: configure.yml
-  - include_tasks: service.yml
+  - block:
+    - import_tasks: cluster_initialize.yml
+      when: not pgdata_dir_version.stat.exists
+    - import_tasks: configure.yml
+    - import_tasks: service.yml
+    tags: [ install, cluster ]
 
-  - import_tasks: users.yml
-  - import_tasks: databases.yml
-  - import_tasks: users_props.yml
+  - block:
+    - import_tasks: users.yml
+      tags: [ users ]
+    - import_tasks: databases.yml
+      tags: [ db ]
+    - import_tasks: users_props.yml
+      tags: [ users ]
+    tags: [ config ]
+
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
 - block:
-  - include_tasks: cluster_copy_and_configure.yml
+  - import_tasks: cluster_copy_and_configure.yml
   when: postgresql_role == 'secondary'
+  tags: [ install, cluster ]
 
-- include_tasks: configure_service.yml
+- import_tasks: configure_service.yml
+  tags: [ config ]
