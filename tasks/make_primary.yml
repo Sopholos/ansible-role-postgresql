@@ -25,5 +25,4 @@
         dest: "{{ trigger_file }}"
         force: false
 
-  when: result.rowcount == 1
-  when: result.query_result.0.pg_is_in_recovery == true
+  when: result.rowcount == 1 and result.query_result.0.pg_is_in_recovery == true
