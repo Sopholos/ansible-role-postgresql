@@ -7,6 +7,11 @@
 
   - name: Execute sql script {{ postgresql_scripts_item.name }} against {{ postgresql_scripts_item.db }} 
     shell: "sudo -u {{ postgresql_user }} psql --dbname={{ postgresql_scripts_item.db }} --echo-all --file=/tmp/ansible-postgre-script.sql"
+    register: psqlout
+
+  - name: Output {{ postgresql_scripts_item.name }} against {{ postgresql_scripts_item.db }}
+    debug:
+      msg: "{{ psqlout.stdout }}"
 
   - name: Delete sql script /tmp/ansible-postgre-script.sql
     file: 
