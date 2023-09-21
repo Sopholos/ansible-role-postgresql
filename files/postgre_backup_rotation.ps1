@@ -6,16 +6,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-#$logs = "e:\Logs\Tasks"
-
-$start = Get-Date
 
 function Cleanup-Folder($BackupFolder, $Days) {
-	echo "Cleaning up: $folder"
 		
-	foreach ($File in Get-Childitem $BackupFolder -Recurse -File ) { #-Include *.7z,*.7zbk,*.done,*.gz) {
+	foreach ($File in Get-Childitem $BackupFolder -Recurse -File ) {
 	   if ($File.LastWriteTime -lt (Get-Date).AddDays($Days)) {
-			#echo $File
 			del $File -Verbose
 	   }
 	}
@@ -27,11 +22,8 @@ try
 {
 
 	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
-#	$logName = [IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
-#	$log = Join-Path $logs -ChildPath "$($logName)_$date.log"	
-#	Start-Transcript -Path ($log)
-	
 	Cleanup-Folder  $BackupFolder $Days
+	
 #	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\51\full\" -21	
 #	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\51\wal\" -15	
 
@@ -56,13 +48,7 @@ try
 	
 #	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\ge\15-main\full\" -21
 #	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\ge\15-main\wal\" -15
-	
-#	Write-Host "Cleanup finished"
 }
 catch {
     throw
 }
-#finally {
-#	Write-Host "Took: " ((Get-Date) - $start)
-#	Stop-Transcript
-#}
