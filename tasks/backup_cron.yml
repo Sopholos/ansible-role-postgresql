@@ -85,7 +85,7 @@
       month: "{{ item.cron.month | default('*') }}"
       day: "{{ item.cron.day | default('*') }}"
       user: root
-      job: "/usr/local/bin/postgre_backup_rotation.ps1"
+      job: "/usr/local/bin/postgre_backup_rotation.ps1 -BackupFolder {{ item.cluster.backupFolder }} -Days {{ item.cluster.days }}"
       cron_file: postgres_rotation
     loop: "{{ postgres_backup.backup_sets }}"
     when: 
@@ -104,7 +104,7 @@
       day: "{{ item.cron.day | default('*') }}"
       special_time: "{{ item.cron.special_time }}"
       user: root
-      job: "/usr/local/bin/postgre_backup_rotation.ps1"
+      job: "/usr/local/bin/postgre_backup_rotation.ps1 -BackupFolder {{ item.cluster.backupFolder }} -Days {{ item.cluster.days }}"
       cron_file: postgres_rotation
     loop: "{{ postgres_backup.backup_sets }}"
     when: 
@@ -123,7 +123,7 @@
       month: "{{ item.cron.month | default('*') }}"
       day: "{{ item.cron.day | default('*') }}"
       user: root
-      job: "/usr/local/bin/postgre_dump_rotation.ps1"
+      job: "/usr/local/bin/postgre_dump_rotation.ps1 -BackupFolder {{ item.dump.backupFolder }} -Days {{ item.dump.days }}"
       cron_file: postgres_rotation
     loop: "{{ postgres_backup.backup_sets }}"
     when: 
@@ -142,7 +142,7 @@
       day: "{{ item.cron.day | default('*') }}"
       special_time: "{{ item.cron.special_time }}"
       user: root
-      job: "/usr/local/bin/postgre_dump_rotation.ps1"
+      job: "/usr/local/bin/postgre_dump_rotation.ps1 -BackupFolder {{ item.dump.backupFolder }} -Days {{ item.dump.days }}"
       cron_file: postgres_rotation
     loop: "{{ postgres_backup.backup_sets }}"
     when: 
