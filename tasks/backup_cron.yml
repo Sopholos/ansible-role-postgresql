@@ -38,44 +38,6 @@
       - item.cluster is defined
 
 - block:
-  - name: prepare | creates a cron dump backup file under /etc/cron.d
-    cron:
-      name: "Backup-{{ item.name }}"
-      weekday: "{{ item.cron.weekday | default('*') }}"
-      hour: "{{ item.cron.hour | default('*') }}"
-      minute: "{{ item.cron.minute | default('*') }}"
-      month: "{{ item.cron.month | default('*') }}"
-      day: "{{ item.cron.day | default('*') }}"
-      user: root
-      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
-      cron_file: postgres_backup
-    loop: "{{ postgres_backup.backup_sets }}"
-    when: 
-      - postgres_backup.backup_sets is defined
-      - item.cron is defined
-      - item.cron.special_time is not defined
-      - item.dump is defined
-
-  - name: prepare | creates a cron dump backup file under /etc/cron.d with special_time
-    cron:
-      name: "Backup-{{ item.name }}"
-      weekday: "{{ item.cron.weekday | default('*') }}"
-      hour: "{{ item.cron.hour | default('*') }}"
-      minute: "{{ item.cron.minute | default('*') }}"
-      month: "{{ item.cron.month | default('*') }}"
-      day: "{{ item.cron.day | default('*') }}"
-      special_time: "{{ item.cron.special_time }}"
-      user: root
-      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
-      cron_file: postgres_backup
-    loop: "{{ postgres_backup.backup_sets }}"
-    when: 
-      - postgres_backup.backup_sets is defined
-      - item.cron is defined
-      - item.cron.special_time is defined
-      - item.dump is defined
-
-- block:
   - name: prepare | creates a cron cluster backup rotation file under /etc/cron.d
     cron:
       name: "Rotation-{{ item.name }}"
@@ -112,6 +74,44 @@
       - item.cron is defined
       - item.cron.special_time is defined
       - item.cluster is defined
+
+- block:
+  - name: prepare | creates a cron dump backup file under /etc/cron.d
+    cron:
+      name: "Backup-{{ item.name }}"
+      weekday: "{{ item.cron.weekday | default('*') }}"
+      hour: "{{ item.cron.hour | default('*') }}"
+      minute: "{{ item.cron.minute | default('*') }}"
+      month: "{{ item.cron.month | default('*') }}"
+      day: "{{ item.cron.day | default('*') }}"
+      user: root
+      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
+      cron_file: postgres_backup
+    loop: "{{ postgres_backup.backup_sets }}"
+    when: 
+      - postgres_backup.backup_sets is defined
+      - item.cron is defined
+      - item.cron.special_time is not defined
+      - item.dump is defined
+
+  - name: prepare | creates a cron dump backup file under /etc/cron.d with special_time
+    cron:
+      name: "Backup-{{ item.name }}"
+      weekday: "{{ item.cron.weekday | default('*') }}"
+      hour: "{{ item.cron.hour | default('*') }}"
+      minute: "{{ item.cron.minute | default('*') }}"
+      month: "{{ item.cron.month | default('*') }}"
+      day: "{{ item.cron.day | default('*') }}"
+      special_time: "{{ item.cron.special_time }}"
+      user: root
+      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
+      cron_file: postgres_backup
+    loop: "{{ postgres_backup.backup_sets }}"
+    when: 
+      - postgres_backup.backup_sets is defined
+      - item.cron is defined
+      - item.cron.special_time is defined
+      - item.dump is defined
 
 - block:
   - name: prepare | creates a cron dump rotation file under /etc/cron.d
