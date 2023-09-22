@@ -9,7 +9,7 @@
       month: "{{ cleanup.cron.month | default('*') }}"
       day: "{{ cleanup.cron.day | default('*') }}"
       user: root
-      job: "/usr/local/bin/common_cleanup.ps1 -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }}"
+      job: "/usr/local/bin/common_cleanup.ps1 -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day }}"
       cron_file: cleanup
     loop: "{{ cleanup.cron.folder }}"
     when: 
@@ -26,7 +26,7 @@
       day: "{{ cleanup.cron.day | default('*') }}"
       special_time: "{{ cleanup.cron.special_time }}"
       user: root
-      job: "/usr/local/bin/common_cleanup.ps1 -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }}"
+      job: "/usr/local/bin/common_cleanup.ps1 -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day }}"
       cron_file: cleanup
     loop: "{{ cleanup.cron.folder }}"
     when: 
