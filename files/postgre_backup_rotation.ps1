@@ -23,32 +23,8 @@ try
 
 	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
 	Cleanup-Folder  $BackupFolder $Days
-	
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\51\full\" -21	
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\51\wal\" -15	
-
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\60\full\" -21
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\60\wal\" -15
-	
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\zabbix\full\" -20
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\zabbix\wal\" -15
-	
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\geo2\full\" -21
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\geo2\wal\" -15
-	
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\mn2\15-main\full\" -21
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\mn2\wal\" -15
-#	Cleanup-Folder -folder "e:\BackupCold\PostgreSQLPersistent\mn2\15-main\wal\" -15	
-	
-#	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\mn\15-main\full\" -21
-#	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\mn\15-main\wal\" -15
-	
-#	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\wb\15-main\full\" -21
-#	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\wb\15-main\wal\" -15
-	
-#	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\ge\15-main\full\" -21
-#	Cleanup-Folder -folder "e:\BackupCold\AgroterraPostgreSQLPersistent\ge\15-main\wal\" -15
 }
+
 catch {
     throw
 }

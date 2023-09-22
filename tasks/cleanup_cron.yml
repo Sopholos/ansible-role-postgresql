@@ -1,0 +1,34 @@
+---
+- block:
+  - name: prepare | creates a cron cleanup file under /etc/cron.d
+    cron:
+      name: "cleanup_{{ item.name }}"
+      weekday: "{{ cleanup.cron.weekday | default('*') }}"
+      hour: "{{ cleanup.cron.hour | default('*') }}"
+      minute: "{{ cleanup.cron.minute | default('*') }}"
+      month: "{{ cleanup.cron.month | default('*') }}"
+      day: "{{ cleanup.cron.day | default('*') }}"
+      user: root
+      job: "/usr/local/bin/common_cleanup.ps1 -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }}"
+      cron_file: cleanup
+    loop: "{{ cleanup.cron.folder }}"
+    when: 
+      - cleanup.cron is defined
+      - cleanup.cron.special_time is not defined
+
+  - name: prepare | creates a cron cleanup file under /etc/cron.d with special_time
+    cron:
+      name: "cleanup_{{ item.name }}"
+      weekday: "{{ cleanup.cron.weekday | default('*') }}"
+      hour: "{{ cleanup.cron.hour | default('*') }}"
+      minute: "{{ cleanup.cron.minute | default('*') }}"
+      month: "{{ cleanup.cron.month | default('*') }}"
+      day: "{{ cleanup.cron.day | default('*') }}"
+      special_time: "{{ cleanup.cron.special_time }}"
+      user: root
+      job: "/usr/local/bin/common_cleanup.ps1 -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }}"
+      cron_file: cleanup
+    loop: "{{ cleanup.cron.folder }}"
+    when: 
+      - cleanup.cron is defined
+      - cleanup.cron.special_time is defined
