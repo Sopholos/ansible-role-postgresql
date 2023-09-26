@@ -59,4 +59,4 @@
   tags: [ config ]
 
 - import_tasks: cleanup_cron.yml
-  tags: [cleanup]
+  tags: [ cleanup ]

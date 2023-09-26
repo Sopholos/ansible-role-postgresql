@@ -1,26 +1,23 @@
 #!/snap/bin/powershell -Command
 # Ansible managed
 param(
-    [parameter(Mandatory=$true)][string]$BackupFolder,
-    [parameter(Mandatory=$true)][int]$Days,
-    [parameter(Mandatory=$true)][AllowNull()][System.Nullable[int]]$SaveEachMonthDay
+    [parameter(Mandatory=$true)][string]$backupFolder,
+    [parameter(Mandatory=$true)][int]$days,
+    [parameter(Mandatory=$true)][AllowNull()][System.Nullable[int]]$saveEachMonthDay
 )
 
 $ErrorActionPreference = "Stop"
 
-function Cleanup-Folder($BackupFolder, $Days) {
-    foreach ($File in Get-Childitem $BackupFolder -Recurse -File) {
-        if ($SaveEachMonthDay -ne $null) {
-            if ($File.LastWriteTime.Day -eq $SaveEachMonthDay) {
-                continue
-            }
-        }
-        if ($File.LastWriteTime -lt (Get-Date).AddDays($Days)) {
-            del $File -Verbose
+foreach ($File in Get-Childitem $backupFolder -Recurse -File) {
+    if ($saveEachMonthDay -ne $null) {
+        if ($File.LastWriteTime.Day -eq $saveEachMonthDay) {
+            continue
         }
     }
-
-    Get-ChildItem $BackupFolder -Recurse -Directory | ? { -Not ($_.EnumerateFiles('*',1) | Select-Object -First 1) } | Remove-Item -Recurse
+    if ($File.LastWriteTime -lt (Get-Date).AddDays($days)) {
+        del $File -Verbose
+    }
 }
 
-Cleanup-Folder $BackupFolder $Days
+# delete empty dirs
+Get-ChildItem $backupFolder -Recurse -Directory | ? { -Not ($_.EnumerateFiles('*',1) | Select-Object -First 1) } | Remove-Item -Recurse
