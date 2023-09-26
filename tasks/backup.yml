@@ -24,4 +24,4 @@
     - { src: postgre_wal_write.ps1, dest: /usr/local/bin/postgre_wal_write.ps1 }
     - { src: postgre_backup_cluster.ps1, dest: /usr/local/bin/postgre_backup_cluster.ps1 }
     - { src: postgre_dump_db.ps1, dest: /usr/local/bin/postgre_dump_db.ps1 }
-    - { src: remove_backup.ps1, dest: /usr/local/bin/remove_backup.ps1 }
+    - { src: Remove_Backup.ps1, dest: /usr/local/bin/Remove_Backup.ps1 }
