@@ -3,14 +3,14 @@
 param(
     [parameter(Mandatory=$true)][string]$BackupFolder,
     [parameter(Mandatory=$true)][int]$Days,
-    [parameter(Mandatory=$true)][int]$SaveEachMonthDay
+    [parameter(Mandatory=$true)][AllowNull()][System.Nullable[int]]$SaveEachMonthDay
 )
 
 $ErrorActionPreference = "Stop"
 
 function Cleanup-Folder($BackupFolder, $Days) {
     foreach ($File in Get-Childitem $BackupFolder -Recurse -File) {
-        if ($SaveEachMonthDay -ne 0) {
+        if ($SaveEachMonthDay -ne $null) {
             if ($File.LastWriteTime.Day -eq $SaveEachMonthDay) {
                 continue
             }
