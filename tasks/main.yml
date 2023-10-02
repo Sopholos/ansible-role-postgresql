@@ -57,3 +57,6 @@
 
 - import_tasks: configure_service.yml
   tags: [ config ]
+
+- import_tasks: cleanup_cron.yml
+  tags: [ cleanup ]
