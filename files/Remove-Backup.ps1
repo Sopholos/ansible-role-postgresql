@@ -10,14 +10,14 @@ $ErrorActionPreference = "Stop"
 
 foreach ($file in Get-Childitem $BackupFolder -Recurse -File) {
     if ($SaveEachMonthDay -ne $null) {
-        if ($file.lastWriteTime -eq $SaveEachMonthDay) {
+        if ($file.LastWriteTime.Day -eq $SaveEachMonthDay) {
             continue
         }
     }
     if ($file.lastWriteTime -lt (Get-Date).AddDays($Days)) {
-        del $file -Verbose
+        Remove-Item $file -Verbose
     }
 }
 
 # delete empty dirs
-Get-ChildItem $BackupFolder -Recurse -Directory | ? { -Not ($_.EnumerateFiles('*',1) | Select-Object -First 1) } | Remove-Item -Recurse
+Get-ChildItem $BackupFolder -Recurse -Directory | ? { -Not ($_.EnumerateFiles('*', 1) | Select-Object -First 1) } | Remove-Item -Recurse -Verbose

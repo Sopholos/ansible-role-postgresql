@@ -4,11 +4,15 @@
   tags: [ init ]
 
 - import_tasks: backup.yml
-  tags: [ backup ]
+  tags: [ backup, cleanup ]
 
 - import_tasks: backup_cron.yml
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
   tags: [ backup ]
+
+- import_tasks: cleanup_cron.yml
+  tags: [ cleanup ]
+  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
 # Setup/install tasks.
 - import_tasks: setup-RedHat.yml
@@ -57,6 +61,3 @@
 
 - import_tasks: configure_service.yml
   tags: [ config ]
-
-- import_tasks: cleanup_cron.yml
-  tags: [ cleanup ]
