@@ -24,7 +24,7 @@
   tags: [ install ]
 
 - import_tasks: initialize.yml
-  tags: [ init ]
+  tags: [ install ]
 
 - block:
   - import_tasks: cluster_copy_and_configure.yml
