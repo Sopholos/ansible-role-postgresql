@@ -20,4 +20,4 @@ foreach ($file in Get-Childitem $BackupFolder -Recurse -File) {
 }
 
 # delete empty dirs
-Get-ChildItem $BackupFolder -Recurse -Directory | ? { -Not ($_.EnumerateFiles('*', 1) | Select-Object -First 1) } | Remove-Item -Recurse -Verbose
+Get-ChildItem $BackupFolder -Recurse -Directory | ? { -Not ($_.EnumerateFiles('*', 1) | Select-Object -First 1) } | Remove-Item -Recurse -Verbose   

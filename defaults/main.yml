@@ -66,3 +66,5 @@ postgresql_users: []
 
 # Whether to output user data when managing users.
 postgres_users_no_log: true
+
+postgres_temp_template_script_path: /tmp/ansible-postgre-script.sql
