@@ -1,0 +1,16 @@
+---
+- name: prepare | creates a cron vacuum task under /etc/cron.d
+  cron:
+    name: "vacuum_{{ item.name }}"
+    weekday: "{{ item.cron.weekday | default('*') }}"
+    hour: "{{ item.cron.hour | default('*') }}"
+    minute: "{{ item.cron.minute | default('*') }}"
+    month: "{{ item.cron.month | default('*') }}"
+    day: "{{ item.cron.day | default('*') }}"
+    user: root
+    job: su - postgres -c "vacuumdb --{{ 'full' if item.params.full else 'analyze' | default('analyze') }} --verbose --table='{{ item.params.table }}' {{ item.params.db }} |& tee /var/log/postgresql/last_cron_vacuum.log"
+    cron_file: vacuum
+  loop: "{{ vacuum }}"
+  when: 
+    - vacuum is defined
+    - item.cron is defined
