@@ -24,14 +24,14 @@
   tags: [ install ]
 
 - import_tasks: initialize.yml
-  tags: [ install ]
+  tags: [ install, config ]
 
 - block:
   - import_tasks: cluster_copy_and_configure.yml
   - import_tasks: service.yml
   - import_tasks: make_primary.yml
   when: postgresql_role == 'primary_clone'
-  tags: [ install, cluster ]
+  tags: [ install, cluster, config ]
 
 - block:
   - block:
@@ -39,25 +39,23 @@
       when: not pgdata_dir_version.stat.exists
     - import_tasks: configure.yml
     - import_tasks: service.yml
-    tags: [ install, cluster ]
+    tags: [ install, cluster, config ]
 
-  - block:
-    - import_tasks: users.yml
-      tags: [ users ]
-    - import_tasks: databases.yml
-      tags: [ db ]
-    - import_tasks: users_props.yml
-      tags: [ users ]
-    - import_tasks: dbscripts.yml
-      tags: [ scripts ]
-    tags: [ config ]
+  - import_tasks: users.yml
+    tags: [ users ]
+  - import_tasks: databases.yml
+    tags: [ db ]
+  - import_tasks: users_props.yml
+    tags: [ users ]
+  - import_tasks: dbscripts.yml
+    tags: [ scripts ]
 
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
 - block:
   - import_tasks: cluster_copy_and_configure.yml
   when: postgresql_role == 'secondary'
-  tags: [ install, cluster ]
+  tags: [ install, cluster, config ]
 
 - import_tasks: configure_service.yml
   tags: [ config ]
