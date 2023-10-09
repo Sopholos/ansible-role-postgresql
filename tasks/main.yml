@@ -14,8 +14,8 @@
   tags: [ cleanup ]
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
-- import_tasks: vacuum_cron.yml
-  tags: [ vacuum ]
+- import_tasks: sql_cron.yml
+  tags: [ sql_cron ]
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
 # Setup/install tasks.
