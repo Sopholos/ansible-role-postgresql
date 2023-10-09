@@ -20,8 +20,8 @@
     minute: "{{ item.cron.minute | default('*') }}"
     month: "{{ item.cron.month | default('*') }}"
     day: "{{ item.cron.day | default('*') }}"
-    user: root
-    job: su - postgres -c "psql {{ item.db }} < /opt/postgresql/{{ item.name }}.sql" 2>&1 | /usr/bin/logger -t CRON_SQL
+    user: postgres
+    job: psql {{ item.db }} < /opt/postgresql/{{ item.name }}.sql 2>&1 | /usr/bin/logger -t CRON_SQL
     cron_file: sql_scripts
   loop: "{{ postgresql_cronjob_scripts }}"
   when: 
