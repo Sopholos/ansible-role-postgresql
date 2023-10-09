@@ -14,6 +14,10 @@
   tags: [ cleanup ]
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
+- import_tasks: sql_cron.yml
+  tags: [ sql_cron ]
+  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
+
 # Setup/install tasks.
 - import_tasks: setup-RedHat.yml
   when: ansible_os_family == 'RedHat'

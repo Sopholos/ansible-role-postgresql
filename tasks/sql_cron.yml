@@ -1,0 +1,31 @@
+---
+- name: prepare | creates a sql scripts for cron
+  template: 
+    src: cron_script.sql.j2
+    dest: "/opt/postgresql/{{ item.name }}.sql"
+    owner: postgres
+    mode: '0755'
+  with_items: "{{ postgresql_cronjob_scripts }}"
+  when:
+    - postgresql_cronjob_scripts is defined
+    - item.script is defined
+    - item.db is defined
+    - item.cron is defined
+
+- name: prepare | creates a cron tasks for scripts under /etc/cron.d
+  cron:
+    name: "cronjob_scripts_{{ item.name }}"
+    weekday: "{{ item.cron.weekday | default('*') }}"
+    hour: "{{ item.cron.hour | default('*') }}"
+    minute: "{{ item.cron.minute | default('*') }}"
+    month: "{{ item.cron.month | default('*') }}"
+    day: "{{ item.cron.day | default('*') }}"
+    user: postgres
+    job: psql {{ item.db }} < /opt/postgresql/{{ item.name }}.sql 2>&1 | /usr/bin/logger -t CRON_SQL
+    cron_file: sql_scripts
+  loop: "{{ postgresql_cronjob_scripts }}"
+  when: 
+    - postgresql_cronjob_scripts is defined
+    - item.script is defined
+    - item.db is defined
+    - item.cron is defined
