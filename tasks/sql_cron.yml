@@ -1,9 +1,17 @@
 ---
+- name: Ensure {{ postgres_cron_template_script_path }} directory exists.
+  file:
+    path: "{{ postgres_cron_template_script_path }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    state: directory
+    mode: 0700
+
 - name: prepare | creates a sql scripts for cron
   template: 
     src: cron_script.sql.j2
-    dest: "/opt/postgresql/{{ item.name }}.sql"
-    owner: postgres
+    dest: "{{ postgres_cron_template_script_path }}/{{ item.name }}.sql"
+    owner: "{{ postgresql_user }}"
     mode: '0755'
   with_items: "{{ postgresql_cronjob_scripts }}"
   when:
@@ -20,8 +28,8 @@
     minute: "{{ item.cron.minute | default('*') }}"
     month: "{{ item.cron.month | default('*') }}"
     day: "{{ item.cron.day | default('*') }}"
-    user: postgres
-    job: psql {{ item.db }} < /opt/postgresql/{{ item.name }}.sql 2>&1 | /usr/bin/logger -t CRON_SQL
+    user: "{{ postgresql_user }}"
+    job: psql {{ item.db }} < {{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1 | /usr/bin/logger -t CRON_SQL
     cron_file: sql_scripts
   loop: "{{ postgresql_cronjob_scripts }}"
   when: 
