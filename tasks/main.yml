@@ -19,12 +19,16 @@
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
 # Setup/install tasks.
-- import_tasks: setup-RedHat.yml
-  when: ansible_os_family == 'RedHat'
+- include_tasks: setup-Archlinux.yml
+  when: ansible_os_family == 'Archlinux'
   tags: [ install ]
 
-- import_tasks: setup-Debian.yml
+- include_tasks: setup-Debian.yml
   when: ansible_os_family == 'Debian'
+  tags: [ install ]
+
+- include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
   tags: [ install ]
 
 - import_tasks: initialize.yml
