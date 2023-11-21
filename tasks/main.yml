@@ -3,21 +3,6 @@
 - import_tasks: variables.yml
   tags: [ init ]
 
-- import_tasks: backup.yml
-  tags: [ backup, cleanup ]
-
-- import_tasks: backup_cron.yml
-  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
-  tags: [ backup ]
-
-- import_tasks: cleanup_cron.yml
-  tags: [ cleanup ]
-  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
-
-- import_tasks: sql_cron.yml
-  tags: [ sql_cron ]
-  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
-
 # Setup/install tasks.
 - include_tasks: setup-Archlinux.yml
   when: ansible_os_family == 'Archlinux'
@@ -33,6 +18,21 @@
 
 - import_tasks: initialize.yml
   tags: [ install, config ]
+
+- import_tasks: backup.yml
+  tags: [ backup, cleanup ]
+
+- import_tasks: backup_cron.yml
+  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
+  tags: [ backup ]
+
+- import_tasks: cleanup_cron.yml
+  tags: [ cleanup ]
+  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
+
+- import_tasks: sql_cron.yml
+  tags: [ sql_cron ]
+  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
 - block:
   - import_tasks: cluster_copy_and_configure.yml
