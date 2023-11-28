@@ -3,7 +3,7 @@
 param(
 	[parameter(Mandatory=$true)][string]$DestinationDB,
 	[parameter(Mandatory=$true)][string]$BackupFolder,
-	[parameter(Mandatory=$true)][string]$FileFilter
+	[parameter(Mandatory=$true)][string]$BackupFileFilter
 )
 
 function Find-Dump {

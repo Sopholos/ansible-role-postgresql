@@ -1,0 +1,53 @@
+---
+- name: Ensure {{ postgres_cron_template_script_path }} directory exists.
+  file:
+    path: "{{ postgres_cron_template_script_path }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    state: directory
+    mode: 0700
+
+- name: prepare | creates a powershell scripts for cron restore
+  template: 
+    src: Restore-Dumps.ps1.j2
+    dest: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1"
+    owner: "{{ postgresql_user }}"
+    mode: '0755'
+  loop: "{{ postgres_restore.restore_sets }}"
+  when: 
+    - postgres_restore.restore_sets is defined
+
+- name: prepare | creates a cron restore file under /etc/cron.d  
+  cron:
+    name: "Restore-{{ item.name }}"
+    weekday: "{{ item.cron.weekday | default('*') }}"
+    hour: "{{ item.cron.hour | default('*') }}"
+    minute: "{{ item.cron.minute | default('*') }}"
+    month: "{{ item.cron.month | default('*') }}"
+    day: "{{ item.cron.day | default('*') }}"
+    user: "{{ item.cron.user | default('root') }}"
+    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1"
+    cron_file: postgres_restore
+  loop: "{{ postgres_restore.restore_sets }}"
+  when: 
+    - postgres_restore.restore_sets is defined
+    - item.cron is defined
+    - item.cron.special_time is not defined
+
+- name: prepare | creates a cron restore file under /etc/cron.d with special_time
+  cron:
+    name: "Restore-{{ item.name }}"
+    weekday: "{{ item.cron.weekday | default('*') }}"
+    hour: "{{ item.cron.hour | default('*') }}"
+    minute: "{{ item.cron.minute | default('*') }}"
+    month: "{{ item.cron.month | default('*') }}"
+    day: "{{ item.cron.day | default('*') }}"
+    special_time: "{{ item.cron.special_time }}"
+    user: "{{ item.cron.user | default('root') }}"
+    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1"
+    cron_file: postgres_restore
+  loop: "{{ postgres_backup.backup_sets }}"
+  when: 
+    - postgres_restore.restore_sets is defined
+    - item.cron is defined
+    - item.cron.special_time is defined

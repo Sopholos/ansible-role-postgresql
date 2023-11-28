@@ -1,0 +1,12 @@
+#!/snap/bin/powershell -Command
+{{ ansible_managed | comment }}
+
+$ErrorActionPreference = "Stop"
+
+{% for dump in item.dumps %}
+/usr/local/bin/Restore-LatestDump.ps1 -DestinationDB "{{ dump.destinationDB }}" -BackupFolder "{{ dump.backupFolder }}" -BackupFileFilter "{{ dump.backupFilter }}"
+{% endfor %}
+
+{% for dump in item.copies %}
+/usr/local/bin/Restore-DBFromTemplate.ps1 -DestinationDB "{{ dump.destinationDB }}" -SourceDB "{{ dump.sourceDB }}"
+{% endfor %}

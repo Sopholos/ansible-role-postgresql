@@ -25,3 +25,5 @@
     - { src: postgre_backup_cluster.ps1, dest: /usr/local/bin/postgre_backup_cluster.ps1 }
     - { src: postgre_dump_db.ps1, dest: /usr/local/bin/postgre_dump_db.ps1 }
     - { src: Remove-Backup.ps1, dest: /usr/local/bin/Remove-Backup.ps1 }
+    - { src: Restore-DBFromTemplate.ps1, dest: /usr/local/bin/Restore-DBFromTemplate.ps1 }
+    - { src: Restore-LatestDump.ps1, dest: /usr/local/bin/Restore-LatestDump.ps1 }

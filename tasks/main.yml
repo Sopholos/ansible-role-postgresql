@@ -22,6 +22,10 @@
 - import_tasks: backup.yml
   tags: [ backup, cleanup ]
 
+- import_tasks: restore_cron.yml
+  when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
+  tags: [ restore ]
+
 - import_tasks: backup_cron.yml
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
   tags: [ backup ]
