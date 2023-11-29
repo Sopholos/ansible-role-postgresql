@@ -5,26 +5,14 @@ param(
 	[parameter(Mandatory=$true)][string]$SourceDB
 )
 
-function Invoke-PgSQL {
-	param(
-		[parameter(Mandatory=$true)][string]$sql,
-		[parameter(Mandatory=$false)][string]$database = "postgres"
-	)
-
-	Write-Host "Executing against $database query $sql"
-
-	&psql "--dbname=$database" "--command=$sql"
-	if (0 -ne $LASTEXITCODE) {
-		throw "Failed to start: $LASTEXITCODE psql"
-	}
-}
+$scriptDir = Split-Path $PSCommandPath
 
 function Stop-Sessions {
 	param(
 		[parameter(Mandatory=$true)][string]$destdb
 	)
-
-	Invoke-PgSQL -sql "select pg_terminate_backend(pid) as pg_terminate_backend_$destdb from pg_stat_activity where datname='$destdb';"
+	
+	/usr/local/bin/Invoke-PgSQL.ps1 -Query "select pg_terminate_backend(pid) as pg_terminate_backend_$destdb from pg_stat_activity where datname='$destdb';"
 }
 
 $ErrorActionPreference = "Stop"
@@ -39,7 +27,7 @@ try {
 	&dropdb "--force" $DestinationDB
 
 	Stop-Sessions $SourceDB
-	Invoke-PgSQL "create database $DestinationDB template $SourceDB"
+	/usr/local/bin/Invoke-PgSQL "create database $DestinationDB template $SourceDB"
 		
 	Write-Host -ForegroundColor Green "Restored successfully"	
 }

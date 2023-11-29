@@ -3,8 +3,11 @@
 param(
 	[parameter(Mandatory=$true)][string]$DestinationDB,
 	[parameter(Mandatory=$true)][string]$BackupFolder,
-	[parameter(Mandatory=$true)][string]$BackupFileFilter
+	[parameter(Mandatory=$true)][string]$BackupFileFilter,
+	[parameter(Mandatory=$true)][string]$QueryFile
 )
+
+$scriptDir = Split-Path $PSCommandPath
 
 function Find-Dump {
 	param(
@@ -68,6 +71,10 @@ try {
 	$warning = Restore-DB `
 		-destdb $DestinationDB `
 		-sourceFile $sourceFile
+
+	if ($null -ne $QueryFile) {
+		/usr/local/bin/Invoke-PgSQLFile.ps1 -File $QueryFile -Database $DestinationDB
+	}
 
 	if ($warning) {
 		throw "restored with warnings"

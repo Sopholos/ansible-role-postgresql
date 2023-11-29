@@ -1,0 +1,8 @@
+--
+-- Ansible managed
+--
+
+{% for sql in item.sql %}
+{{ sql.script }};
+
+{% endfor %}

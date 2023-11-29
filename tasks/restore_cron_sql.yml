@@ -1,0 +1,11 @@
+---
+- name: prepare | creates a sql scripts for cron restore {{ restore_set.name }}_{{ item.destinationDB }}.sql
+  template: 
+    src: RestoreDumpsQuery.sql.j2
+    dest: "{{ postgres_cron_template_script_path }}/{{ restore_set.name }}_{{ item.destinationDB }}.sql"
+    owner: "{{ postgresql_user }}"
+    mode: '0755'
+  loop: "{{ restore_set.dumps }}"
+  when:
+    - restore_set.dumps is defined
+    - item.sql is defined
