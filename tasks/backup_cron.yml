@@ -9,7 +9,7 @@
       month: "{{ item.cron.month | default('*') }}"
       day: "{{ item.cron.day | default('*') }}"
       user: root
-      job: "/usr/local/bin/postgre_backup_cluster.ps1 -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }}"
+      job: "/usr/local/bin/postgre_backup_cluster.ps1 -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
       cron_file: postgres_backup
     loop: "{{ postgres_backup.backup_sets }}"
     when: 
@@ -28,7 +28,7 @@
       day: "{{ item.cron.day | default('*') }}"
       special_time: "{{ item.cron.special_time }}"
       user: root
-      job: "/usr/local/bin/postgre_backup_cluster.ps1 -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }}"
+      job: "/usr/local/bin/postgre_backup_cluster.ps1 -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
       cron_file: postgres_backup
     loop: "{{ postgres_backup.backup_sets }}"
     when: 
@@ -47,7 +47,7 @@
       month: "{{ item.cron.month | default('*') }}"
       day: "{{ item.cron.day | default('*') }}"
       user: root
-      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
+      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
       cron_file: postgres_backup
     loop: "{{ postgres_backup.backup_sets }}"
     when: 
@@ -66,7 +66,7 @@
       day: "{{ item.cron.day | default('*') }}"
       special_time: "{{ item.cron.special_time }}"
       user: root
-      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
+      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
       cron_file: postgres_backup
     loop: "{{ postgres_backup.backup_sets }}"
     when: 

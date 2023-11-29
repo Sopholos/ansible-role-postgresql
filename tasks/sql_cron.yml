@@ -29,7 +29,7 @@
     month: "{{ item.cron.month | default('*') }}"
     day: "{{ item.cron.day | default('*') }}"
     user: "{{ postgresql_user }}"
-    job: psql {{ item.db }} < {{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1 | /usr/bin/logger -t CRON_SQL
+    job: psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ item.db }} --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1 | /usr/bin/logger -t CRON_SQL
     cron_file: sql_scripts
   loop: "{{ postgresql_cronjob_scripts }}"
   when: 

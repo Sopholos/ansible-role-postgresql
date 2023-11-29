@@ -9,7 +9,7 @@
       dest: "{{ postgres_temp_template_script_file }}"
 
   - name: Execute sql script {{ postgres_temp_template_script_file }} against {{ postgresql_scripts_item.db }} 
-    shell: "sudo -u {{ postgresql_user }} psql --dbname={{ postgresql_scripts_item.db }} --echo-all --file={{ postgres_temp_template_script_file }}"
+    shell: "sudo -u {{ postgresql_user }} psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ postgresql_scripts_item.db }} --echo-all --file={{ postgres_temp_template_script_file }}"
     register: psqlout
 
   - name: Output {{ postgresql_scripts_item.name }} against {{ postgresql_scripts_item.db }}

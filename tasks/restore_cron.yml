@@ -34,7 +34,7 @@
     month: "{{ item.cron.month | default('*') }}"
     day: "{{ item.cron.day | default('*') }}"
     user: "{{ item.cron.user | default('root') }}"
-    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1"
+    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1 2>&1 | /usr/bin/logger -t CRON_PSQL_RESTORE"
     cron_file: postgres_restore
   loop: "{{ postgres_restore.restore_sets }}"
   when:
@@ -52,7 +52,7 @@
     day: "{{ item.cron.day | default('*') }}"
     special_time: "{{ item.cron.special_time }}"
     user: "{{ item.cron.user | default('root') }}"
-    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1"
+    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1 2>&1 | /usr/bin/logger -t CRON_PSQL_RESTORE"
     cron_file: postgres_restore
   loop: "{{ postgres_backup.backup_sets }}"
   when:
