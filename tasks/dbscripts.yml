@@ -1,12 +1,13 @@
 ---
+- name: Ensure sql script {{ postgres_temp_template_script_path }} folder exists
+  file:
+    path: "{{ postgres_temp_template_script_path }}"
+    state: directory
+    owner: "{{ postgresql_user }}"
+
 - name: Run SQL Scripts
   include_tasks: dbscript.yml
   loop_control:
      loop_var: postgresql_scripts_item
   with_items: "{{ postgresql_scripts }}"
   when: postgresql_scripts is defined
-  
-- name: Delete sql script {{ postgres_temp_template_script_path }}
-  file: 
-    path: "{{ postgres_temp_template_script_path }}"
-    state: absent
