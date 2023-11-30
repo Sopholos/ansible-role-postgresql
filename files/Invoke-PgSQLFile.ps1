@@ -6,7 +6,7 @@ param(
 )
 Write-Host "Executing against $Database query $File"
 
-&psql "--dbname=$Database" "--pset=pager=off" "--file=$File"
+&psql "--dbname=$Database" "--no-psqlrc" "--variable=ON_ERROR_STOP=1" "--pset=pager=off" "--file=$File"
 if (0 -ne $LASTEXITCODE) {
 	throw "Failed to start: $LASTEXITCODE psql"
 }
