@@ -8,11 +8,11 @@
   when: ansible_os_family == 'Archlinux'
   tags: [ install ]
 
-- include_tasks: setup-Debian.yml
+- import_tasks: setup-Debian.yml
   when: ansible_os_family == 'Debian'
   tags: [ install ]
 
-- include_tasks: setup-RedHat.yml
+- import_tasks: setup-RedHat.yml
   when: ansible_os_family == 'RedHat'
   tags: [ install ]
 
