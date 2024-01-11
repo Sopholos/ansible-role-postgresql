@@ -3,6 +3,7 @@
 
 $ErrorActionPreference = "Stop"
 
+{% if item.dumps is defined %}
 {% for dump in item.dumps %}
 
 /usr/local/bin/Restore-LatestDump.ps1 `
@@ -11,9 +12,12 @@ $ErrorActionPreference = "Stop"
     -BackupFileFilter "{{ dump.backupFilter }}" `
     -QueryFile "{{ postgres_cron_template_script_path }}/{{ item.name }}_{{ dump.destinationDB }}.sql"
 {% endfor %}
+{% endif %}
 
+{% if item.copies is defined %}
 {% for dump in item.copies %}
 /usr/local/bin/Restore-DBFromTemplate.ps1 `
     -DestinationDB "{{ dump.destinationDB }}" `
     -SourceDB "{{ dump.sourceDB }}"
 {% endfor %}
+{% endif %}
