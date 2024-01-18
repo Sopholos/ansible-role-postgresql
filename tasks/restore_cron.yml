@@ -25,6 +25,7 @@
   when:
     - postgres_restore.restore_sets is defined
 
+#import role from https://github.com/apavlov-agro/ansible_role_cron.git
 - name: Crontab jobs
   import_role:
     name: ../../linux/role_cron
@@ -33,37 +34,3 @@
   when:
     - postgres_restore.restore_sets is defined
 
-#- name: prepare | creates a cron restore file under /etc/cron.d
-#  cron:
-#    name: "Restore-{{ item.name }}"
-#    weekday: "{{ item.cron.weekday | default('*') }}"
-#    hour: "{{ item.cron.hour | default('*') }}"
-#    minute: "{{ item.cron.minute | default('*') }}"
-#    month: "{{ item.cron.month | default('*') }}"
-#    day: "{{ item.cron.day | default('*') }}"
-#    user: "{{ item.cron.user | default('root') }}"
-#    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1 2>&1 | /usr/bin/logger -t CRON_PSQL_RESTORE"
-#    cron_file: postgres_restore
-#  loop: "{{ postgres_restore.restore_sets }}"
-#  when:
-#    - postgres_restore.restore_sets is defined
-#    - item.cron is defined
-#    - item.cron.special_time is not defined
-#
-#- name: prepare | creates a cron restore file under /etc/cron.d with special_time
-#  cron:
-#    name: "Restore-{{ item.name }}"
-#    weekday: "{{ item.cron.weekday | default('*') }}"
-#    hour: "{{ item.cron.hour | default('*') }}"
-#    minute: "{{ item.cron.minute | default('*') }}"
-#    month: "{{ item.cron.month | default('*') }}"
-#    day: "{{ item.cron.day | default('*') }}"
-#    special_time: "{{ item.cron.special_time }}"
-#    user: "{{ item.cron.user | default('root') }}"
-#    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1 2>&1 | /usr/bin/logger -t CRON_PSQL_RESTORE"
-#    cron_file: postgres_restore
-#  loop: "{{ postgres_backup.backup_sets }}"
-#  when:
-#    - postgres_restore.restore_sets is defined
-#    - item.cron is defined
-#    - item.cron.special_time is defined
