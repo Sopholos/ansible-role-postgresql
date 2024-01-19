@@ -1,12 +1,5 @@
 ---
-#import role from https://github.com/apavlov-agro/ansible_role_cron.git
-- name: Crontab jobs
-  import_role:
-    name: ../../linux/role_cron
-  vars:
-    cron_tasks: "{{ postgres_backup.backup_sets | map ( attribute='cron' ) }}"
-  when:
-    - postgres_backup.backup_sets is defined
+
 
 #- block:
 #  - name: prepare | creates a cron cluster backup file under /etc/cron.d

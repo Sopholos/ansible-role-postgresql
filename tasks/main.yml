@@ -38,6 +38,15 @@
   tags: [ sql_cron ]
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'
 
+#import role from https://github.com/apavlov-agro/ansible_role_cron.git
+- name: Crontab jobs
+  import_role:
+    name: ../../linux/role_cron
+  vars:
+    cron_tasks: "{{ postgres_cron_sets | map ( attribute='cron' ) }}"
+  when:
+    - postgres_cron_sets is defined
+
 - block:
   - import_tasks: cluster_copy_and_configure.yml
   - import_tasks: service.yml
