@@ -9,3 +9,14 @@
   when:
     - restore_set.dumps is defined
     - item.sql is defined
+
+- name: prepare | creates a sql scripts for cron restore copy {{ restore_set.name }}
+  template: 
+    src: RestoreDumpsQuery.sql.j2
+    dest: "{{ postgres_cron_template_script_path }}/copy_{{ restore_set.name }}_{{ item.destinationDB }}.sql"
+    owner: "{{ postgresql_user }}"
+    mode: '0755'
+  loop: "{{ restore_set.copies }}"
+  when:
+    - restore_set.copies is defined
+    - item.sql is defined
