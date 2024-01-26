@@ -44,11 +44,11 @@ function Restore-DB {
 	}
 
 	$cpuCount = [Environment]::ProcessorCount - 2
-	
+
 	Write-Host "&pg_restore" "--jobs=$cpuCount" "--dbname=$destdb" "$sourceFile"
 	&pg_restore "--jobs=$cpuCount" "--dbname=$destdb" "$sourceFile"
 
-	if (0 -eq $LASTEXITCODE) {			
+	if (0 -eq $LASTEXITCODE) {
 		Write-Host -ForegroundColor Green "Restored $sourceFile to $destdb"
 	}
 	else {

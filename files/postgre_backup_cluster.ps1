@@ -4,14 +4,14 @@ param(
 	[parameter(Mandatory=$true)][string]$PostgresqlUser,
 	[parameter(Mandatory=$true)][string]$PostgresqlHost,
 	[parameter(Mandatory=$true)][int]$PostgresqlPort,
-	[parameter(Mandatory=$true)][string]$BackupFolder	
+	[parameter(Mandatory=$true)][string]$BackupFolder
 )
 $ErrorActionPreference = "Stop"
 try
 {
 	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
-	$BackupPath = Join-Path $BackupFolder -ChildPath "$date"	
-	
+	$BackupPath = Join-Path $BackupFolder -ChildPath "$date"
+
 	pg_basebackup --progress `
 		--username=$PostgresqlUser `
 		--pgdata=$BackupPath `
@@ -31,7 +31,7 @@ try
 	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
 
 	$doneFile = Join-Path $BackupPath "base.tar.gz.done"
-	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile	
+	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
 }
 catch {
     throw

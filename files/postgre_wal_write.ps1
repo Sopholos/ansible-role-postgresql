@@ -16,7 +16,7 @@ try
         New-Item -ItemType Directory $backwal
     }
 
-	$destination = Join-Path $backwal -ChildPath $ArchiveName    
+	$destination = Join-Path $backwal -ChildPath $ArchiveName
     Copy-Item -Path $ArchiveFullPath -Destination $destination
 
 	$doneFile = "${destination}.done"
