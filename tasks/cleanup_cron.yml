@@ -1,10 +1,10 @@
 ---
-- name: set list of tasks
+- name: set list of tasks cleanup cron
   set_fact:
-    tmp_job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }} 2>&1"
+    tmp_job: "{{ postgresql_job_cleanup }}"
+#   -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1
   with_items: "{{ cleanup.cron.folder }}"
   register: tmp_jobs
-
 
 - name: print cron cleanup pre var
   debug:

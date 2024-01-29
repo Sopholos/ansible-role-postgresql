@@ -28,7 +28,7 @@
 #import role from https://github.com/apavlov-agro/ansible_role_cron.git
 - name: Crontab jobs
   import_role:
-    name: ../../linux/role_cron
+    name: ../../../linux/role_cron
   vars:
     cron_tasks: "{{ postgres_restore.restore_sets | map ( attribute='cron' ) }}"
   when:
