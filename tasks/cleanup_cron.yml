@@ -1,4 +1,29 @@
 ---
+- name: set list of tasks
+  set_fact:
+    tmp_job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }} 2>&1"
+  with_items: "{{ cleanup.cron.folder }}"
+  register: tmp_jobs
+
+
+- name: print cron cleanup pre var
+  debug:
+    msg: "{{ tmp_jobs.results | map(attribute='ansible_facts.tmp_job') | list }}"
+
+- name: set list of jobs
+  set_fact:
+    tmp_list_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts.tmp_job') | list }}"
+
+- name: create list of dict
+  set_fact:
+    list_for_cron_role: "{{ [cleanup.cron  | combine ({'job':item})] + [list_for_cron_role | default ({})] }}"
+  with_items:
+    "{{ tmp_list_jobs }}"
+
+- name: print results cleanup cron list
+  debug:
+    msg: "{{ list_for_cron_role }}"
+
 - block:
   - name: prepare | creates a cron cleanup task under /etc/cron.d
     cron:
