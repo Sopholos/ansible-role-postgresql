@@ -20,6 +20,45 @@
     - item.db is defined
     - item.cron is defined
 
+- name: set list of tasks sql cron
+  set_fact:
+    job: "psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ item.db }} --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1"
+  with_items: "{{ postgresql_cronjob_scripts }}"
+  register: sql_cron_jobs
+
+- name: set list of sql cron jobs
+  set_fact:
+    tmp_list_sqljobs: "{{ sql_cron_jobs.results | map(attribute='ansible_facts') | list }}"
+
+- name: set list of tasks
+  set_fact:
+    tmp_list_tasks: "{{ postgresql_cronjob_scripts | map ( attribute='cron' ) }}"
+
+- name: create list of dict
+  set_fact:
+    tmplist_for_cron_role: "{{ tmp_list_tasks  | zip ( tmp_list_sqljobs ) }}"
+
+- name: print cron sql scripts list
+  debug:
+    msg: "{{ tmplist_for_cron_role }}"
+
+- name: merge attributes
+  set_fact:
+    list_for_cron_role: "{{ [item [0]  | combine (item[1])] + list_for_cron_role | default ([]) }}"
+  with_items:
+    "{{ tmplist_for_cron_role }}"
+
+- name: print cron sql scripts list
+  debug:
+    msg: "{{ list_for_cron_role }}"
+
+#import role from https://github.com/apavlov-agro/ansible_role_cron.git
+- name: Crontab jobs
+  import_role:
+    name: ../../../linux/role_cron
+  vars:
+    cron_tasks: "{{ list_for_cron_role }}"
+
 - name: prepare | creates a cron tasks for scripts under /etc/cron.d
   cron:
     name: "cronjob_scripts_{{ item.name }}"

@@ -7,13 +7,13 @@
     state: directory
     mode: 0700
 
-#- name: prepare | creates a sql scripts for cron restore
-#  include_tasks: restore_cron_sql.yml
-#  loop: "{{ postgres_restore.restore_sets }}"
-#  loop_control:
-#     loop_var: restore_set
-#  when:
-#    - postgres_restore.restore_sets is defined
+- name: prepare | creates a sql scripts for cron restore
+  include_tasks: restore_cron_sql.yml
+  loop: "{{ postgres_restore.restore_sets }}"
+  loop_control:
+     loop_var: restore_set
+  when:
+    - postgres_restore.restore_sets is defined
 
 - name: prepare | creates a powershell scripts for cron restore
   template:

@@ -1,22 +1,26 @@
 ---
 - name: set list of tasks cleanup cron
   set_fact:
-    tmp_job: "{{ postgresql_job_cleanup }}"
-#   -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1
+    job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }} 2>&1"
+    name: "{{ item.name }}"
   with_items: "{{ cleanup.cron.folder }}"
   register: tmp_jobs
 
+- name: print all var tmp_jobs
+  debug:
+    msg: "{{ tmp_jobs.results }}"
+
 - name: print cron cleanup pre var
   debug:
-    msg: "{{ tmp_jobs.results | map(attribute='ansible_facts.tmp_job') | list }}"
+    msg: "{{ tmp_jobs.results | map(attribute='ansible_facts') | list }}"
 
 - name: set list of jobs
   set_fact:
-    tmp_list_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts.tmp_job') | list }}"
+    tmp_list_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts') | list }}"
 
 - name: create list of dict
   set_fact:
-    list_for_cron_role: "{{ [cleanup.cron  | combine ({'job':item})] + [list_for_cron_role | default ({})] }}"
+    list_for_cron_role: "{{ [cleanup.cron  | combine (item)] + list_for_cron_role | default ([]) }}"
   with_items:
     "{{ tmp_list_jobs }}"
 
@@ -24,36 +28,43 @@
   debug:
     msg: "{{ list_for_cron_role }}"
 
-- block:
-  - name: prepare | creates a cron cleanup task under /etc/cron.d
-    cron:
-      name: "cleanup_{{ item.name }}"
-      weekday: "{{ cleanup.cron.weekday | default('*') }}"
-      hour: "{{ cleanup.cron.hour | default('*') }}"
-      minute: "{{ cleanup.cron.minute | default('*') }}"
-      month: "{{ cleanup.cron.month | default('*') }}"
-      day: "{{ cleanup.cron.day | default('*') }}"
-      user: root
-      job: "/usr/local/bin/Remove-Backup.ps1 -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1 | /usr/bin/logger -t CRON_CLEANUP"
-      cron_file: cleanup
-    loop: "{{ cleanup.cron.folder }}"
-    when: 
-      - cleanup.cron is defined
-      - cleanup.cron.special_time is not defined
+#import role from https://github.com/apavlov-agro/ansible_role_cron.git
+- name: Crontab jobs
+  import_role:
+    name: ../../../linux/role_cron
+  vars:
+    cron_tasks: "{{ list_for_cron_role }}"
 
-  - name: prepare | creates a cron cleanup task under /etc/cron.d with special_time
-    cron:
-      name: "cleanup_{{ item.name }}"
-      weekday: "{{ cleanup.cron.weekday | default('*') }}"
-      hour: "{{ cleanup.cron.hour | default('*') }}"
-      minute: "{{ cleanup.cron.minute | default('*') }}"
-      month: "{{ cleanup.cron.month | default('*') }}"
-      day: "{{ cleanup.cron.day | default('*') }}"
-      special_time: "{{ cleanup.cron.special_time }}"
-      user: root
-      job: "/usr/local/bin/Remove-Backup.ps1 -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1 | /usr/bin/logger -t CRON_CLEANUP"
-      cron_file: cleanup
-    loop: "{{ cleanup.cron.folder }}"
-    when: 
-      - cleanup.cron is defined
-      - cleanup.cron.special_time is defined
+#- block:
+#  - name: prepare | creates a cron cleanup task under /etc/cron.d
+#    cron:
+#      name: "cleanup_{{ item.name }}"
+#      weekday: "{{ cleanup.cron.weekday | default('*') }}"
+#      hour: "{{ cleanup.cron.hour | default('*') }}"
+#      minute: "{{ cleanup.cron.minute | default('*') }}"
+#      month: "{{ cleanup.cron.month | default('*') }}"
+#      day: "{{ cleanup.cron.day | default('*') }}"
+#      user: root
+#      job: "/usr/local/bin/Remove-Backup.ps1 -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1 | /usr/bin/logger -t CRON_CLEANUP"
+#      cron_file: cleanup
+#    loop: "{{ cleanup.cron.folder }}"
+#    when:
+#      - cleanup.cron is defined
+#      - cleanup.cron.special_time is not defined
+#
+#  - name: prepare | creates a cron cleanup task under /etc/cron.d with special_time
+#    cron:
+#      name: "cleanup_{{ item.name }}"
+#      weekday: "{{ cleanup.cron.weekday | default('*') }}"
+#      hour: "{{ cleanup.cron.hour | default('*') }}"
+#      minute: "{{ cleanup.cron.minute | default('*') }}"
+#      month: "{{ cleanup.cron.month | default('*') }}"
+#      day: "{{ cleanup.cron.day | default('*') }}"
+#      special_time: "{{ cleanup.cron.special_time }}"
+#      user: root
+#      job: "/usr/local/bin/Remove-Backup.ps1 -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1 | /usr/bin/logger -t CRON_CLEANUP"
+#      cron_file: cleanup
+#    loop: "{{ cleanup.cron.folder }}"
+#    when:
+#      - cleanup.cron is defined
+#      - cleanup.cron.special_time is defined
