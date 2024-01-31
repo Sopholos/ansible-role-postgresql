@@ -6,14 +6,6 @@
   with_items: "{{ cleanup.cron.folder }}"
   register: tmp_jobs
 
-- name: print all var tmp_jobs
-  debug:
-    msg: "{{ tmp_jobs.results }}"
-
-- name: print cron cleanup pre var
-  debug:
-    msg: "{{ tmp_jobs.results | map(attribute='ansible_facts') | list }}"
-
 - name: set list of jobs
   set_fact:
     tmp_list_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts') | list }}"
@@ -24,16 +16,14 @@
   with_items:
     "{{ tmp_list_jobs }}"
 
-- name: print results cleanup cron list
-  debug:
-    msg: "{{ list_for_cron_role }}"
-
 #import role from https://github.com/apavlov-agro/ansible_role_cron.git
 - name: Crontab jobs
   import_role:
     name: ../../../linux/role_cron
   vars:
     cron_tasks: "{{ list_for_cron_role }}"
+  when:
+    - cleanup.cron is defined
 
 #- block:
 #  - name: prepare | creates a cron cleanup task under /etc/cron.d
