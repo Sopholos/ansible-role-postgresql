@@ -25,12 +25,23 @@
   when:
     - postgres_restore.restore_sets is defined
 
+- name: set list of tasks restore cron
+  set_fact:
+    listrestore_for_cron_role: "{{ [ item.cron | combine ({'job': simple_job }) | combine ({'name': simple_name }) ] + listrestore_for_cron_role | default ([]) }}"
+  vars:
+    simple_job: "{{ postgres_cron_template_script_path }}/{{item.name}}.ps1"
+    simple_name: "Restore - {{item.name}}"
+  with_items: "{{ postgres_restore.restore_sets }}"
+  when:
+    - postgres_restore.restore_sets is defined
+    - item.cron is defined
+
 #import role from https://github.com/apavlov-agro/ansible_role_cron.git
 - name: Crontab jobs
   import_role:
     name: ../../../linux/role_cron
   vars:
-    cron_tasks: "{{ postgres_restore.restore_sets | map ( attribute='cron' ) }}"
+    cron_tasks: "{{ listrestore_for_cron_role }}"
   when:
     - postgres_restore.restore_sets is defined
 
