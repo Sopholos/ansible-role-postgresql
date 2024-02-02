@@ -69,3 +69,6 @@ postgres_users_no_log: true
 
 postgres_temp_template_script_path: /tmp/ansible-postgre-script/
 postgres_cron_template_script_path: /opt/postgresql
+postgresql_job_backup_db: "/usr/local/bin/postgre_dump_db.ps1"
+postgresql_job_backup_cluster: "/usr/local/bin/postgre_backup_cluster.ps1"
+postgresql_job_cleanup: "/usr/local/bin/Remove-Backup.ps1"
