@@ -1,4 +1,8 @@
 ---
+- name: override tmp_jobs to null
+  set_fact:
+    tmp_jobs:
+
 - name: prepare | creates a cron cleanup task
   set_fact:
     cron_pure: "{{ cleanup.cron }}"

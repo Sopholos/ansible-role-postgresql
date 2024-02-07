@@ -20,6 +20,10 @@
     - item.db is defined
     - item.cron is defined
 
+- name: override tmp_jobs to null
+  set_fact:
+    tmp_jobs:
+
 - name: prepare | creates a cron tasks for scripts
   set_fact:
     cron_pure: "{{ item.cron }}"

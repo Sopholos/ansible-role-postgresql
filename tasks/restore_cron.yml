@@ -25,21 +25,21 @@
   when:
     - postgres_restore.restore_sets is defined
 
-- name: set list of tasks restore cron
+- name: override tmp_jobs to null
   set_fact:
-    listrestore_for_cron_role: "{{ [ item.cron | combine ({ 'name': item.name, 'job': simple_job, 'cron_file': 'postgres_restore' }) ] + listrestore_for_cron_role | default ([]) }}"
-  vars:
-    simple_job: "{{ postgres_cron_template_script_path }}/{{item.name}}.ps1"
+    tmp_jobs:
+
+- name: prepare | creates a cron restore
+  set_fact:
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "{{ postgres_cron_template_script_path }}/{{item.name}}.ps1"
+      name: "Restore-{{ item.name }}"
+      cron_file: postgres_restore
   with_items: "{{ postgres_restore.restore_sets }}"
+  register: tmp_jobs
   when:
     - postgres_restore.restore_sets is defined
     - item.cron is defined
 
-- name: Crontab jobs
-  import_role:
-    name: "{{ postgresql_crontab_role_path }}"
-  vars:
-    cron_tasks: "{{ listrestore_for_cron_role }}"
-  when:
-    - postgres_restore.restore_sets is defined
-
+- import_tasks: cron_jobs_prepare.yml

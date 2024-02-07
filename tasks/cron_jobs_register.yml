@@ -4,4 +4,4 @@
     name: "{{ postgresql_crontab_role_path }}"
   vars:
     cron_tasks: "{{ list_for_cron_role }}"
-  when: "(list_for_cron_role | length) > 0"  
+  when: "list_for_cron_role is defined and ((list_for_cron_role | length) > 0)"
