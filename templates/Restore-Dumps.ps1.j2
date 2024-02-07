@@ -14,10 +14,14 @@ $ErrorActionPreference = "Stop"
 {% endfor %}
 {% endif %}
 
+# ==============================================
+
 {% if item.copies is defined %}
-{% for dump in item.copies %}
+{% for copy in item.copies %}
+
 /usr/local/bin/Restore-DBFromTemplate.ps1 `
-    -DestinationDB "{{ dump.destinationDB }}" `
-    -SourceDB "{{ dump.sourceDB }}"
+    -DestinationDB "{{ copy.destinationDB }}" `
+    -SourceDB "{{ copy.sourceDB }}" `
+    -QueryFile "{{ postgres_cron_template_script_path }}/copy_{{ item.name }}_{{ copy.destinationDB }}.sql"
 {% endfor %}
 {% endif %}
