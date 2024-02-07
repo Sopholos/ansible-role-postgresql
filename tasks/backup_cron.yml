@@ -1,18 +1,7 @@
 ---
-- name: set list of tasks backup db cron
-  set_fact:
-    listbckpdump_for_cron_role: "{{ [ item.cron | combine ({'job': simple_job })] + listbckpdump_for_cron_role | default ([]) }}"
-  vars:
-    simple_job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1"
-  with_items: "{{ postgres_backup.backup_sets }}"
-  when:
-    - postgres_backup.backup_sets is defined
-    - item.cron is defined
-    - item.dump is defined
-
 - name: set list of tasks backup cluster cron
   set_fact:
-    listbckpcluster_for_cron_role: "{{ [ item.cron | combine ({'job': simple_job })] + listbckpcluster_for_cron_role | default ([]) }}"
+    listbckpcluster_for_cron_role: "{{ [ item.cron | combine ({ 'name': item.name, 'job': simple_job, 'cron_file':' 'postgres_backup' })] + listbckpcluster_for_cron_role | default ([]) }}"
   vars:
     simple_job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1"
   with_items: "{{ postgres_backup.backup_sets }}"
@@ -20,6 +9,17 @@
     - postgres_backup.backup_sets is defined
     - item.cron is defined
     - item.cluster is defined
+
+- name: set list of tasks backup db cron
+  set_fact:
+    listbckpdump_for_cron_role: "{{ [ item.cron | combine ({ 'name': item.name, 'job': simple_job, 'cron_file': 'postgres_backup' })] + listbckpdump_for_cron_role | default ([]) }}"
+  vars:
+    simple_job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1"
+  with_items: "{{ postgres_backup.backup_sets }}"
+  when:
+    - postgres_backup.backup_sets is defined
+    - item.cron is defined
+    - item.dump is defined
 
 - name: merge backup cron jobs lists
   set_fact:
@@ -29,7 +29,6 @@
   debug:
     msg: "{{ listbckp_for_cron_role }}"
 
-#import role from https://github.com/apavlov-agro/ansible_role_cron.git
 - name: Crontab jobs
   import_role:
     name: ../../../linux/role_cron

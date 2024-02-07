@@ -22,15 +22,14 @@
 
 - name: set list of tasks sql cron
   set_fact:
-    listsql_for_cron_role: "{{ [ item.cron | combine ({'job': simple_job })] + listsql_for_cron_role | default ([]) }}"
+    listsql_for_cron_role: "{{ [ item.cron | combine ({ 'name': item.name, 'job': simple_job, 'cron_file': 'postgres_sql' })] + listsql_for_cron_role | default ([]) }}"
   vars:
     simple_job: "psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{item.db}}  --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1"
   with_items: "{{ postgresql_cronjob_scripts }}"
 
-#import role from https://github.com/apavlov-agro/ansible_role_cron.git
 - name: Crontab jobs
   import_role:
-    name: ../../../linux/role_cron
+    name: "{{ postgresql_crontab_role_path }}"
   vars:
     cron_tasks: "{{ listsql_for_cron_role }}"
   when:

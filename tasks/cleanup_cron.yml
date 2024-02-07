@@ -3,6 +3,7 @@
   set_fact:
     job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }} 2>&1"
     name: "{{ item.name }}"
+    cron_file: cleanup 
   with_items: "{{ cleanup.cron.folder }}"
   register: tmp_jobs
 
@@ -16,10 +17,9 @@
   with_items:
     "{{ tmp_list_jobs }}"
 
-#import role from https://github.com/apavlov-agro/ansible_role_cron.git
 - name: Crontab jobs
   import_role:
-    name: ../../../linux/role_cron
+    name: "{{ postgresql_crontab_role_path }}"
   vars:
     cron_tasks: "{{ list_for_cron_role }}"
   when:
