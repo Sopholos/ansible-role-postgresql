@@ -8,7 +8,7 @@
     mode: 0700
 
 - name: prepare | creates a sql scripts for cron
-  template: 
+  template:
     src: cron_script.sql.j2
     dest: "{{ postgres_cron_template_script_path }}/{{ item.name }}.sql"
     owner: "{{ postgresql_user }}"
@@ -20,20 +20,18 @@
     - item.db is defined
     - item.cron is defined
 
-- name: prepare | creates a cron tasks for scripts under /etc/cron.d
-  cron:
-    name: "cronjob_scripts_{{ item.name }}"
-    weekday: "{{ item.cron.weekday | default('*') }}"
-    hour: "{{ item.cron.hour | default('*') }}"
-    minute: "{{ item.cron.minute | default('*') }}"
-    month: "{{ item.cron.month | default('*') }}"
-    day: "{{ item.cron.day | default('*') }}"
-    user: "{{ postgresql_user }}"
-    job: psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ item.db }} --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1 | /usr/bin/logger -t CRON_SQL
-    cron_file: sql_scripts
-  loop: "{{ postgresql_cronjob_scripts }}"
-  when: 
-    - postgresql_cronjob_scripts is defined
-    - item.script is defined
-    - item.db is defined
-    - item.cron is defined
+- name: override tmp_jobs to null
+  set_fact:
+    tmp_jobs:
+
+- name: prepare | creates a cron tasks for scripts
+  set_fact:
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ item.db }} --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1"
+      name: "cronjob_scripts_{{ item.name }}"
+      cron_file: sql_scripts
+  with_items: "{{ postgresql_cronjob_scripts }}"
+  register: tmp_jobs
+
+- import_tasks: cron_jobs_prepare.yml

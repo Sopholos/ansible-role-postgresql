@@ -25,37 +25,21 @@
   when:
     - postgres_restore.restore_sets is defined
 
-- name: prepare | creates a cron restore file under /etc/cron.d
-  cron:
-    name: "Restore-{{ item.name }}"
-    weekday: "{{ item.cron.weekday | default('*') }}"
-    hour: "{{ item.cron.hour | default('*') }}"
-    minute: "{{ item.cron.minute | default('*') }}"
-    month: "{{ item.cron.month | default('*') }}"
-    day: "{{ item.cron.day | default('*') }}"
-    user: "{{ item.cron.user | default('root') }}"
-    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1 2>&1 | /usr/bin/logger -t CRON_PSQL_RESTORE"
-    cron_file: postgres_restore
-  loop: "{{ postgres_restore.restore_sets }}"
-  when:
-    - postgres_restore.restore_sets is defined
-    - item.cron is defined
-    - item.cron.special_time is not defined
+- name: override tmp_jobs to null
+  set_fact:
+    tmp_jobs:
 
-- name: prepare | creates a cron restore file under /etc/cron.d with special_time
-  cron:
-    name: "Restore-{{ item.name }}"
-    weekday: "{{ item.cron.weekday | default('*') }}"
-    hour: "{{ item.cron.hour | default('*') }}"
-    minute: "{{ item.cron.minute | default('*') }}"
-    month: "{{ item.cron.month | default('*') }}"
-    day: "{{ item.cron.day | default('*') }}"
-    special_time: "{{ item.cron.special_time }}"
-    user: "{{ item.cron.user | default('root') }}"
-    job: "{{ postgres_cron_template_script_path }}/{{ item.name }}.ps1 2>&1 | /usr/bin/logger -t CRON_PSQL_RESTORE"
-    cron_file: postgres_restore
-  loop: "{{ postgres_backup.backup_sets }}"
+- name: prepare | creates a cron restore
+  set_fact:
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "{{ postgres_cron_template_script_path }}/{{item.name}}.ps1"
+      name: "Restore-{{ item.name }}"
+      cron_file: postgres_restore
+  with_items: "{{ postgres_restore.restore_sets }}"
+  register: tmp_jobs
   when:
     - postgres_restore.restore_sets is defined
     - item.cron is defined
-    - item.cron.special_time is defined
+
+- import_tasks: cron_jobs_prepare.yml

@@ -1,34 +1,16 @@
 ---
-- block:
-  - name: prepare | creates a cron cleanup task under /etc/cron.d
-    cron:
-      name: "cleanup_{{ item.name }}"
-      weekday: "{{ cleanup.cron.weekday | default('*') }}"
-      hour: "{{ cleanup.cron.hour | default('*') }}"
-      minute: "{{ cleanup.cron.minute | default('*') }}"
-      month: "{{ cleanup.cron.month | default('*') }}"
-      day: "{{ cleanup.cron.day | default('*') }}"
-      user: root
-      job: "/usr/local/bin/Remove-Backup.ps1 -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1 | /usr/bin/logger -t CRON_CLEANUP"
-      cron_file: cleanup
-    loop: "{{ cleanup.cron.folder }}"
-    when: 
-      - cleanup.cron is defined
-      - cleanup.cron.special_time is not defined
+- name: override tmp_jobs to null
+  set_fact:
+    tmp_jobs:
 
-  - name: prepare | creates a cron cleanup task under /etc/cron.d with special_time
-    cron:
+- name: prepare | creates a cron cleanup task
+  set_fact:
+    cron_pure: "{{ cleanup.cron }}"
+    cron_extra:
+      job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }} 2>&1"
       name: "cleanup_{{ item.name }}"
-      weekday: "{{ cleanup.cron.weekday | default('*') }}"
-      hour: "{{ cleanup.cron.hour | default('*') }}"
-      minute: "{{ cleanup.cron.minute | default('*') }}"
-      month: "{{ cleanup.cron.month | default('*') }}"
-      day: "{{ cleanup.cron.day | default('*') }}"
-      special_time: "{{ cleanup.cron.special_time }}"
-      user: root
-      job: "/usr/local/bin/Remove-Backup.ps1 -BackupFolder '{{ item.cleanup_folder }}' -Days '{{ item.days }}' -SaveEachMonthDay '{{ item.save_each_month_day | default('$null') }}' 2>&1 | /usr/bin/logger -t CRON_CLEANUP"
-      cron_file: cleanup
-    loop: "{{ cleanup.cron.folder }}"
-    when: 
-      - cleanup.cron is defined
-      - cleanup.cron.special_time is defined
+      cron_file: cleanup 
+  with_items: "{{ cleanup.cron.folder }}"
+  register: tmp_jobs
+
+- import_tasks: cron_jobs_prepare.yml

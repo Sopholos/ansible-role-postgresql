@@ -1,77 +1,42 @@
 ---
-- block:
-  - name: prepare | creates a cron cluster backup file under /etc/cron.d
-    cron:
-      name: "Backup-{{ item.name }}"
-      weekday: "{{ item.cron.weekday | default('*') }}"
-      hour: "{{ item.cron.hour | default('*') }}"
-      minute: "{{ item.cron.minute | default('*') }}"
-      month: "{{ item.cron.month | default('*') }}"
-      day: "{{ item.cron.day | default('*') }}"
-      user: root
-      job: "/usr/local/bin/postgre_backup_cluster.ps1 -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
-      cron_file: postgres_backup
-    loop: "{{ postgres_backup.backup_sets }}"
-    when: 
-      - postgres_backup.backup_sets is defined
-      - item.cron is defined
-      - item.cron.special_time is not defined
-      - item.cluster is defined
+- name: override tmp_jobs to null
+  set_fact:
+    tmp_jobs:
 
-  - name: prepare | creates a cron cluster backup file under /etc/cron.d with special_time
-    cron:
+- name: prepare | creates a cron cluster backup
+  set_fact:
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1"
       name: "Backup-{{ item.name }}"
-      weekday: "{{ item.cron.weekday | default('*') }}"
-      hour: "{{ item.cron.hour | default('*') }}"
-      minute: "{{ item.cron.minute | default('*') }}"
-      month: "{{ item.cron.month | default('*') }}"
-      day: "{{ item.cron.day | default('*') }}"
-      special_time: "{{ item.cron.special_time }}"
-      user: root
-      job: "/usr/local/bin/postgre_backup_cluster.ps1 -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
       cron_file: postgres_backup
-    loop: "{{ postgres_backup.backup_sets }}"
-    when: 
-      - postgres_backup.backup_sets is defined
-      - item.cron is defined
-      - item.cron.special_time is defined
-      - item.cluster is defined
+  with_items: "{{ postgres_backup.backup_cluster_sets }}"
+  register: tmp_jobs
+  when:
+    - postgres_backup.backup_cluster_sets is defined
+    - item.cron is defined
+    - item.cluster is defined
 
-- block:
-  - name: prepare | creates a cron dump backup file under /etc/cron.d
-    cron:
-      name: "Backup-{{ item.name }}"
-      weekday: "{{ item.cron.weekday | default('*') }}"
-      hour: "{{ item.cron.hour | default('*') }}"
-      minute: "{{ item.cron.minute | default('*') }}"
-      month: "{{ item.cron.month | default('*') }}"
-      day: "{{ item.cron.day | default('*') }}"
-      user: root
-      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
-      cron_file: postgres_backup
-    loop: "{{ postgres_backup.backup_sets }}"
-    when: 
-      - postgres_backup.backup_sets is defined
-      - item.cron is defined
-      - item.cron.special_time is not defined
-      - item.dump is defined
+- import_tasks: cron_jobs_prepare.yml
 
-  - name: prepare | creates a cron dump backup file under /etc/cron.d with special_time
-    cron:
+# -----------------
+
+- name: override tmp_jobs to null
+  set_fact:
+    tmp_jobs:
+
+- name: prepare | creates a cron dump backup file under /etc/cron.d
+  set_fact:
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1"
       name: "Backup-{{ item.name }}"
-      weekday: "{{ item.cron.weekday | default('*') }}"
-      hour: "{{ item.cron.hour | default('*') }}"
-      minute: "{{ item.cron.minute | default('*') }}"
-      month: "{{ item.cron.month | default('*') }}"
-      day: "{{ item.cron.day | default('*') }}"
-      special_time: "{{ item.cron.special_time }}"
-      user: root
-      job: "/usr/local/bin/postgre_dump_db.ps1 -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1 | /usr/bin/logger -t CRON_PSQL_BACKUP"
       cron_file: postgres_backup
-    loop: "{{ postgres_backup.backup_sets }}"
-    when: 
-      - postgres_backup.backup_sets is defined
-      - item.cron is defined
-      - item.cron.special_time is defined
-      - item.dump is defined
-  
+  with_items: "{{ postgres_backup.backup_sets }}"
+  register: tmp_jobs
+  when:
+    - postgres_backup.backup_sets is defined
+    - item.cron is defined
+    - item.dump is defined
+
+- import_tasks: cron_jobs_prepare.yml
