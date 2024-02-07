@@ -1,0 +1,11 @@
+---
+- name: set list of jobs
+  set_fact:
+    tmp_list_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts') | list }}"
+
+- name: create list of dict
+  set_fact:
+    list_for_cron_role: "{{ [item.cron_pure  | combine (item.cron_extra)] + list_for_cron_role | default ([])}}"
+  with_items:
+    "{{ tmp_list_jobs }}"
+  changed_when: "(tmp_list_jobs | length) > 0"

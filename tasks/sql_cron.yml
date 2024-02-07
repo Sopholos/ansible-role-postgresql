@@ -30,20 +30,4 @@
   with_items: "{{ postgresql_cronjob_scripts }}"
   register: tmp_jobs
 
-- name: set list of jobs
-  set_fact:
-    tmp_list_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts') | list }}"
-
-- name: create list of dict
-  set_fact:
-    list_for_cron_role: "{{ [item.cron_pure  | combine (item.cron_extra)] + list_for_cron_role | default ([])}}"
-  with_items:
-    "{{ tmp_list_jobs }}"
-
-- name: Crontab jobs
-  import_role:
-    name: "{{ postgresql_crontab_role_path }}"
-  vars:
-    cron_tasks: "{{ list_for_cron_role }}"
-  when:
-    - cleanup.cron is defined
+- import_tasks: cron_jobs_prepare.yml
