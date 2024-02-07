@@ -1,39 +1,42 @@
 ---
-- name: set list of tasks backup cluster cron
+- name: override tmp_jobs to null
   set_fact:
-    listbckpcluster_for_cron_role: "{{ [ item.cron | combine ({ 'name': item.name, 'job': simple_job, 'cron_file':' 'postgres_backup' })] + listbckpcluster_for_cron_role | default ([]) }}"
-  vars:
-    simple_job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1"
-  with_items: "{{ postgres_backup.backup_sets }}"
+    tmp_jobs:
+
+- name: prepare | creates a cron cluster backup
+  set_fact:
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1"
+      name: "Backup-{{ item.name }}"
+      cron_file: postgres_backup
+  with_items: "{{ postgres_backup.backup_cluster_sets }}"
+  register: tmp_jobs
   when:
-    - postgres_backup.backup_sets is defined
+    - postgres_backup.backup_cluster_sets is defined
     - item.cron is defined
     - item.cluster is defined
 
-- name: set list of tasks backup db cron
+- import_tasks: cron_jobs_prepare.yml
+
+# -----------------
+
+- name: override tmp_jobs to null
   set_fact:
-    listbckpdump_for_cron_role: "{{ [ item.cron | combine ({ 'name': item.name, 'job': simple_job, 'cron_file': 'postgres_backup' })] + listbckpdump_for_cron_role | default ([]) }}"
-  vars:
-    simple_job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1"
+    tmp_jobs:
+
+- name: prepare | creates a cron dump backup file under /etc/cron.d
+  set_fact:
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1"
+      name: "Backup-{{ item.name }}"
+      cron_file: postgres_backup
   with_items: "{{ postgres_backup.backup_sets }}"
+  register: tmp_jobs
   when:
     - postgres_backup.backup_sets is defined
     - item.cron is defined
     - item.dump is defined
 
-- name: merge backup cron jobs lists
-  set_fact:
-    listbckp_for_cron_role: "{{ listbckpdump_for_cron_role | default ([]) }} + {{ listbckpcluster_for_cron_role | default ([]) }}"
-
-- name: Print list of backup cron jobs
-  debug:
-    msg: "{{ listbckp_for_cron_role }}"
-
-- name: Crontab jobs
-  import_role:
-    name: ../../../linux/role_cron
-  vars:
-    cron_tasks: "{{ listbckp_for_cron_role }}"
-  when:
-    - postgres_backup.backup_sets is defined
-    - item.cron is defined
+- import_tasks: cron_jobs_prepare.yml
