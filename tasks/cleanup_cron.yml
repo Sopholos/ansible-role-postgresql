@@ -13,7 +13,7 @@
 
 - name: create list of dict
   set_fact:
-    list_for_cron_role: "{{ [cleanup.cron  | combine (item)] }}"
+    list_for_cron_role: "{{ [cleanup.cron  | combine (item)] + list_for_cron_role | default ([])}}"
   with_items:
     "{{ tmp_list_jobs }}"
 

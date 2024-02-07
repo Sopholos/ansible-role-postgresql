@@ -8,7 +8,7 @@
     mode: 0700
 
 - name: prepare | creates a sql scripts for cron
-  template: 
+  template:
     src: cron_script.sql.j2
     dest: "{{ postgres_cron_template_script_path }}/{{ item.name }}.sql"
     owner: "{{ postgresql_user }}"
@@ -20,18 +20,30 @@
     - item.db is defined
     - item.cron is defined
 
-- name: set list of tasks sql cron
+- name: prepare | creates a cron tasks for scripts
   set_fact:
-    listsql_for_cron_role: "{{ [ item.cron | combine ({ 'name': item.name, 'job': simple_job, 'cron_file': 'postgres_sql' })] + listsql_for_cron_role | default ([]) }}"
-  vars:
-    simple_job: "psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{item.db}}  --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1"
+    cron_pure: "{{ item.cron }}"
+    cron_extra:
+      job: "psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ item.db }} --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1"
+      name: "cronjob_scripts_{{ item.name }}"
+      cron_file: sql_scripts
   with_items: "{{ postgresql_cronjob_scripts }}"
+  register: tmp_jobs
+
+- name: set list of jobs
+  set_fact:
+    tmp_list_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts') | list }}"
+
+- name: create list of dict
+  set_fact:
+    list_for_cron_role: "{{ [item.cron_pure  | combine (item.cron_extra)] + list_for_cron_role | default ([])}}"
+  with_items:
+    "{{ tmp_list_jobs }}"
 
 - name: Crontab jobs
   import_role:
     name: "{{ postgresql_crontab_role_path }}"
   vars:
-    cron_tasks: "{{ listsql_for_cron_role }}"
+    cron_tasks: "{{ list_for_cron_role }}"
   when:
-    - postgresql_cronjob_scripts is defined
-
+    - cleanup.cron is defined
