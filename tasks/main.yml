@@ -20,7 +20,7 @@
   tags: [ install, config ]
 
 - import_tasks: backup.yml
-  tags: [ install ]
+  tags: [ backup_install ]
 
 - import_tasks: restore_cron.yml
   when: postgresql_role == 'primary' or postgresql_role == 'primary_clone'

@@ -11,6 +11,7 @@
       name: "cleanup_{{ item.name }}"
       cron_file: cleanup 
   with_items: "{{ cleanup.cron.folder }}"
+  when: cleanup is defined and cleanup.cron is defined
   register: tmp_jobs
 
 - import_tasks: cron_jobs_prepare.yml

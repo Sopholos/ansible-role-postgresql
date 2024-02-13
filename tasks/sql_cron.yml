@@ -32,6 +32,8 @@
       name: "cronjob_scripts_{{ item.name }}"
       cron_file: sql_scripts
   with_items: "{{ postgresql_cronjob_scripts }}"
+  when:
+    - postgresql_cronjob_scripts is defined
   register: tmp_jobs
 
 - import_tasks: cron_jobs_prepare.yml
