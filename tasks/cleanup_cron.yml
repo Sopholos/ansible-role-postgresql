@@ -10,6 +10,7 @@
       job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }} 2>&1"
       name: "cleanup_{{ item.name }}"
       cron_file: cleanup 
+      tag: "{{ item.tag | default('CRON_CLEANUP') }}"
   with_items: "{{ cleanup.cron.folder }}"
   when: cleanup is defined and cleanup.cron is defined
   register: tmp_jobs

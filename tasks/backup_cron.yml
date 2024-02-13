@@ -10,6 +10,7 @@
       job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1"
       name: "Backup-{{ item.name }}"
       cron_file: postgres_backup
+      tag: "{{ item.tag | default('CRON_PSQL_BACKUP') }}"
   with_items: "{{ postgres_backup.backup_cluster_sets }}"
   register: tmp_jobs
   when:
@@ -32,6 +33,7 @@
       job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1"
       name: "Backup-{{ item.name }}"
       cron_file: postgres_backup
+      tag: "{{ item.tag | default('CRON_PSQL_BACKUP') }}"
   with_items: "{{ postgres_backup.backup_sets }}"
   register: tmp_jobs
   when:

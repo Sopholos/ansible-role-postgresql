@@ -36,6 +36,7 @@
       job: "{{ postgres_cron_template_script_path }}/{{item.name}}.ps1"
       name: "Restore-{{ item.name }}"
       cron_file: postgres_restore
+      tag: "{{ item.tag | default('CRON_PSQL_RESTORE') }}"
   with_items: "{{ postgres_restore.restore_sets }}"
   register: tmp_jobs
   when:
