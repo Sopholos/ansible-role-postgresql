@@ -1,7 +1,6 @@
 ---
 - name: prepare | dependencies
   apt:
-    update_cache: yes
     name:
       - p7zip-full
       - snapd
