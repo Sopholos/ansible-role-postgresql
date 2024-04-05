@@ -9,28 +9,29 @@ param(
 $ErrorActionPreference = "Stop"
 try
 {
-	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
-	$BackupPath = Join-Path $BackupFolder -ChildPath "$date"
+	$7zipPath = "/usr/lib/p7zip/7z"
 
-	pg_basebackup --progress `
+	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
+	$BackupPath = Join-Path $BackupFolder -ChildPath "$date.7zbk"
+
+	pg_basebackup `
+		--progress `
 		--username=$PostgresqlUser `
-		--pgdata=$BackupPath `
-		--wal-method=stream `
+		--pgdata=- `
+		--wal-method=fetch `
 		--format=tar `
 		--checkpoint=fast `
-		--compress=9 `
+		--compress=0 `
 		--host=$PostgresqlHost `
-		--port=$PostgresqlPort
+		--port=$PostgresqlPort `
+	| `
+	&$7zipPath `
+		a $BackupPath `
+		-si -bt -mx=1
 
 	if ($LASTEXITCODE -ne 0) { throw "pg_basebackup exited with code $LASTEXITCODE." }
 
-	$doneFile = Join-Path $BackupPath "backup_manifest.done"
-	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
-
-	$doneFile = Join-Path $BackupPath "pg_wal.tar.gz.done"
-	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
-
-	$doneFile = Join-Path $BackupPath "base.tar.gz.done"
+	$doneFile = "$BackupPath.done"
 	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
 }
 catch {
