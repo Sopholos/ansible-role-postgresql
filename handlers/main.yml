@@ -5,4 +5,9 @@
     state: "{{ postgresql_restarted_state }}"
     sleep: 5
 
-# todo: pg_ctl reload on hba changes
+
+- name: reload postgresql
+  service:
+    name: "{{ postgresql_daemon }}"
+    state: "reloaded"
+    sleep: 5
