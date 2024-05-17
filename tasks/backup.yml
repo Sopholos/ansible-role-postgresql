@@ -21,7 +21,7 @@
   with_items:
     - { src: postgre_wal_read.ps1, dest: /usr/local/bin/postgre_wal_read.ps1 }
     - { src: postgre_wal_write.ps1, dest: /usr/local/bin/postgre_wal_write.ps1 }
-    - { src: postgre_backup_cluster.ps1, dest: /usr/local/bin/postgre_backup_cluster.ps1 }
+    - { src: "{{ (postgresql_version is version('14', '<=')) | ternary('postgre_backup_cluster', 'postgre_backup_cluster2') }}.ps1", dest: /usr/local/bin/postgre_backup_cluster.ps1 }
     - { src: postgre_dump_db.ps1, dest: /usr/local/bin/postgre_dump_db.ps1 }
     - { src: Remove-Backup.ps1, dest: /usr/local/bin/Remove-Backup.ps1 }
     - { src: Invoke-PgSQL.ps1, dest: /usr/local/bin/Invoke-PgSQL.ps1 }
