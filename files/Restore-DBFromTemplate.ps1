@@ -28,7 +28,7 @@ try {
 	&dropdb "--force" $DestinationDB
 
 	Stop-Sessions $SourceDB
-	/usr/local/bin/Invoke-PgSQL "create database $DestinationDB template $SourceDB"
+	/usr/local/bin/Invoke-PgSQL "create database `"$DestinationDB`" template `"$SourceDB`""
 
 	if ($null -ne $QueryFile) {
 		/usr/local/bin/Invoke-PgSQLFile.ps1 -File $QueryFile -Database $DestinationDB
