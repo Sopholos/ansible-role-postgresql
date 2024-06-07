@@ -7,7 +7,7 @@
   set_fact:
     cron_pure: "{{ cleanup.cron }}"
     cron_extra:
-      job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }} 2>&1"
+      job: "{{ postgresql_job_cleanup }} -BackupFolder {{ item.cleanup_folder }} -Days {{ item.days }} -SaveEachMonthDay {{ item.save_each_month_day | default('$null') }}"
       name: "cleanup_{{ item.name }}"
       cron_file: cleanup 
       tag: "{{ item.tag | default('CRON_CLEANUP') }}"

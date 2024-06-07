@@ -28,7 +28,7 @@
   set_fact:
     cron_pure: "{{ item.cron }}"
     cron_extra:
-      job: "psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ item.db }} --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql 2>&1"
+      job: "psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ item.db }} --file={{ postgres_cron_template_script_path }}/{{ item.name }}.sql"
       name: "cronjob_scripts_{{ item.name }}"
       cron_file: sql_scripts
       tag: "{{ item.tag | default('CRON_SQL') }}"

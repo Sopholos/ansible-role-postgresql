@@ -7,7 +7,7 @@
   set_fact:
     cron_pure: "{{ item.cron }}"
     cron_extra:
-      job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} 2>&1"
+      job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }}"
       name: "Backup-{{ item.name }}"
       cron_file: postgres_backup
       tag: "{{ item.tag | default('CRON_PSQL_BACKUP') }}"
@@ -30,7 +30,7 @@
   set_fact:
     cron_pure: "{{ item.cron }}"
     cron_extra:
-      job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }} 2>&1"
+      job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
       name: "Backup-{{ item.name }}"
       cron_file: postgres_backup
       tag: "{{ item.tag | default('CRON_PSQL_BACKUP') }}"
