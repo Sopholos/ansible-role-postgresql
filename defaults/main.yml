@@ -74,5 +74,5 @@ postgresql_job_backup_db: "/usr/local/bin/postgre_dump_db.ps1"
 postgresql_job_backup_cluster: "/usr/local/bin/postgre_backup_cluster.ps1"
 postgresql_job_cleanup: "/usr/local/bin/Remove-Backup.ps1"
 
-#import role from https://github.com/apavlov-agro/ansible_role_cron.git
+# import role from https://github.com/Sopholos/ansible_role_cron.git
 postgresql_crontab_role_path: ../../../linux/role_cron

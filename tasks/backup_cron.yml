@@ -7,7 +7,7 @@
   set_fact:
     cron_pure: "{{ item.cron }}"
     cron_extra:
-      job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }}"
+      job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} -TestArchive \\${{ item.cluster.testArchive | default(false) }} "
       name: "Backup-{{ item.name }}"
       cron_file: postgres_backup
       tag: "{{ item.tag | default('CRON_PSQL_BACKUP') }}"
