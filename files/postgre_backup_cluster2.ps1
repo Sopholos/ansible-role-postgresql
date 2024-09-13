@@ -4,7 +4,7 @@ param(
 	[parameter(Mandatory=$true)][string]$PostgresqlUser,
 	[parameter(Mandatory=$true)][string]$PostgresqlHost,
 	[parameter(Mandatory=$true)][int]$PostgresqlPort,
-	[parameter(Mandatory=$false)][bool]$TestArchive = $false,
+	[parameter(Mandatory=$false)][bool]$TestArchive = $true,
 	[parameter(Mandatory=$true)][string]$BackupFolder
 )
 $ErrorActionPreference = "Stop"
@@ -15,32 +15,23 @@ try
 	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
 	$BackupPath = Join-Path $BackupFolder -ChildPath "$date.7zbk"
 
-	$bashCommand = @"
-	pg_basebackup \
-		--username=$PostgresqlUser \
-		--pgdata=- \
-		--wal-method=fetch \
-		--format=tar \
-		--checkpoint=fast \
-		--compress=none \
-		--host=$PostgresqlHost \
-		--port=$PostgresqlPort \
-	| \
-	$7zipPath \
-		a $BackupPath \
-		-si -bt -mx=1;
-
-	backupStatus=`$((`${PIPESTATUS[0]} | `${PIPESTATUS[1]}));
-	echo BackupStatus: `$backupStatus;
-	exit `$backupStatus;
-"@
-	bash -c $bashCommand
+	pg_basebackup `
+		--progress `
+		--username=$PostgresqlUser `
+		--pgdata=$BackupPath `
+		--wal-method=fetch `
+		--format=tar `
+		--checkpoint=fast `
+		--compress=1 `
+		--host=$PostgresqlHost `
+		--port=$PostgresqlPort
 
 	if ($LASTEXITCODE -ne 0) { throw "pg_basebackup exited with code $LASTEXITCODE." }
 
 	if ($TestArchive) {
+		$gz = Join-Path $BackupPath "base.tar.gz"
 		&$7zipPath `
-			t $BackupPath
+			t $gz
 
 		if ($LASTEXITCODE -ne 0) { throw "7z test exited with code $LASTEXITCODE." }
 	}
