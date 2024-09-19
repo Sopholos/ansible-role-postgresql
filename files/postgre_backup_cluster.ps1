@@ -19,7 +19,7 @@ try
 		--progress `
 		--username=$PostgresqlUser `
 		--pgdata=$BackupPath `
-		--wal-method=fetch `
+		--wal-method=stream `
 		--format=tar `
 		--checkpoint=fast `
 		--compress=1 `
@@ -34,6 +34,14 @@ try
 			t $gz
 
 		if ($LASTEXITCODE -ne 0) { throw "7z test exited with code $LASTEXITCODE." }
+
+		$gz = Join-Path $BackupPath "pg_wal.tar.gz"
+		if (Test-Path -Path $gz) {
+			&$7zipPath `
+				t $gz
+
+			if ($LASTEXITCODE -ne 0) { throw "7z test wal exited with code $LASTEXITCODE." }
+		}
 	}
 
 	$doneFile = "$BackupPath.done"
