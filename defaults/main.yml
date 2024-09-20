@@ -11,6 +11,9 @@ postgresql_user: postgres
 postgresql_group: postgres
 postgresql_packages_extra: []
 
+postgresql_manage_user:
+postgresql_manage_host:
+
 # `md5` or `scram-sha-256` (https://www.postgresql.org/docs/10/auth-methods.html)
 postgresql_auth_method: "{{ ansible_fips  | ternary('scram-sha-256', 'md5') }}"
 
