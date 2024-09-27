@@ -10,7 +10,10 @@ param(
 $ErrorActionPreference = "Stop"
 try
 {
-	$7zipPath = "/usr/lib/p7zip/7z"
+	$7zipPath = "/usr/bin/7za"
+	if (!(Test-Path -Path $7zipPath)) {
+		$7zipPath = "/usr/lib/p7zip/7z"
+	}
 
 	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
 	$BackupPath = Join-Path $BackupFolder -ChildPath "$date.7zbk"
