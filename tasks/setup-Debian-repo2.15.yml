@@ -1,0 +1,11 @@
+---
+- name: Add Postgres repo to sources list
+  ansible.builtin.deb822_repository:
+    name: apt.postgresql.org
+    types: [deb]
+    uris: "http://apt.postgresql.org/pub/repos/apt/"
+    suites: "{{ postgresql_debian_codename }}-pgdg"
+    components: [main]
+    signed_by: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+    enabled: true

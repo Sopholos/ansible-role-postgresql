@@ -1,0 +1,8 @@
+---
+- name: add pg repo ansible 2.15
+  include_tasks: setup-Debian-repo2.15.yml
+  when: ansible_version.full is version('2.15', '>=')
+
+- name: add pg repo ansible 2.1
+  include_tasks: setup-Debian-repo2.1.yml
+  when: ansible_version.full is version('2.15', '<')

@@ -13,16 +13,7 @@
     name: "{{ postgresql_python_library }}"
     state: present
 
-- name: Add Postgres repo to sources list
-  ansible.builtin.deb822_repository:
-    name: apt.postgresql.org
-    types: [deb]
-    uris: "http://apt.postgresql.org/pub/repos/apt/"
-    suites: "{{ postgresql_debian_codename }}-pgdg"
-    components: [main]
-    signed_by: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    state: present
-    enabled: true
+- import_tasks: setup-Debian-repo.yml
 
 # https://askubuntu.com/questions/1392214/is-there-a-way-to-install-postgresql-using-apt-get-without-it-running-initdb-aut
 # Or create the directory /etc/postgresql/$VERSION before the postgresql-$VERSION package gets installed. The existence of this directory will make the post-installation script skip the creation of a default cluster.
@@ -31,7 +22,6 @@
   apt:
     name: postgresql-common
     state: present
-    update_cache: true
 
 - name: Configure postgresql-common
   ini_file:
@@ -45,7 +35,6 @@
   apt:
     name: "{{ postgresql_packages }}"
     state: present
-    update_cache: true
 
 - name: Ensure extra packages are installed
   apt:
@@ -63,7 +52,6 @@
     apt:
       name: "timescaledb-2-postgresql-{{ postgresql_timescaledb.version }}"
       state: present
-      update_cache: true
     notify: restart postgresql
     when: postgresql_timescaledb.version is defined
 

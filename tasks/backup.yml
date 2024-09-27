@@ -1,15 +1,21 @@
 ---
-- name: prepare | dependencies
+- name: prepare | 7z
   apt:
-    name:
-      - p7zip-full
-      - snapd
+    name: p7zip-full
+    state: present
+  when: ansible_os_family == 'Debian'
 
-- name: prepare | snap powershell
-  community.general.snap:
-    name:
-      - powershell
-    classic: true
+- name: prepare | 7z
+  ansible.builtin.package:
+    name: p7zip
+  when: ansible_os_family == 'RedHat'
+  
+- name: prepare | powershell
+  import_tasks: prepare-powershell.yaml
+
+- name: prepare | postgres-client
+  import_tasks: prepare-postgres-client.yaml
+  when: postgresql_backup_install_client is defined and postgresql_backup_install_client
 
 - name: prepare | copy PS scripts
   copy:
