@@ -9,8 +9,14 @@ param(
 	[parameter(Mandatory=$true)][string]$BackupFolder
 )
 $ErrorActionPreference = "Stop"
+
 try
 {
+	if (/usr/local/bin/Get-PGIsInRecovery -eq $true) {
+		Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
+		return;
+	}
+
 	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
 
 	New-Item -ItemType Directory -Force -Path $BackupFolder

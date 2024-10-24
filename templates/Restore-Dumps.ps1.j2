@@ -3,6 +3,11 @@
 
 $ErrorActionPreference = "Stop"
 
+if (/usr/local/bin/Get-PGIsInRecovery -eq $true) {
+    Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
+    return;
+}
+
 {% if item.dumps is defined %}
 {% for dump in item.dumps %}
 

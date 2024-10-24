@@ -10,6 +10,11 @@ param(
 $ErrorActionPreference = "Stop"
 try
 {
+	if (/usr/local/bin/Get-PGIsInRecovery -eq $true) {
+		Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
+		return;
+	}
+
 	$7zipPath = "/usr/bin/7za"
 	if (!(Test-Path -Path $7zipPath)) {
 		$7zipPath = "/usr/lib/p7zip/7z"
