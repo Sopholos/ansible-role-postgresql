@@ -3,12 +3,12 @@
   - set_fact:
       postgres_temp_template_script_file: "{{ postgres_temp_template_script_path }}/{{ postgresql_scripts_item.db }}_{{ postgresql_scripts_item.script | hash('md5') }}.sql" 
 
-  - name: Template sql script {{ postgres_temp_template_script_file }}
+  - name: Template {{ postgresql_scripts_item.name }} sql script {{ postgres_temp_template_script_file }}
     template: 
       src: script.sql.j2
       dest: "{{ postgres_temp_template_script_file }}"
 
-  - name: Execute sql script {{ postgres_temp_template_script_file }} against {{ postgresql_scripts_item.db }} 
+  - name: Execute {{ postgresql_scripts_item.name }} sql script {{ postgres_temp_template_script_file }} against {{ postgresql_scripts_item.db }} 
     shell: "sudo -u {{ postgresql_user }} psql --no-psqlrc --variable=ON_ERROR_STOP=1 --dbname={{ postgresql_scripts_item.db }} --echo-all --file={{ postgres_temp_template_script_file }}"
     register: psqlout
 
