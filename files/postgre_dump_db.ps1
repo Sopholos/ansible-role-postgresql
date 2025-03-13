@@ -10,8 +10,13 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
+$start = Get-Date
+
 try
 {
+	$env:LC_MESSAGES="C"
+	$env:PGOPTIONS='-c lc_monetary=C'
+
 	if (/usr/local/bin/Get-PGIsInRecovery -eq $true) {
 		Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
 		return;
@@ -33,7 +38,12 @@ try
 
 	$doneFile = $backupFile + ".done"
 	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
+
+	Write-Host -ForegroundColor Green "Backed up successfully"
 }
 catch {
     throw
+}
+finally {
+	Write-Host "Took: " ((Get-Date) - $start)
 }
