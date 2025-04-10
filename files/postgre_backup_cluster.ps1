@@ -10,7 +10,10 @@ param(
 $ErrorActionPreference = "Stop"
 try
 {
-	if (/usr/local/bin/Get-PGIsInRecovery -eq $true) {
+	if ((/usr/local/bin/Get-PGIsInRecovery `
+			-PostgresqlHost $PostgresqlHost `
+			-PostgresqlPort $PostgresqlPort `
+			-PostgresqlUser $PostgresqlUser) -eq $true) {
 		Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
 		return;
 	}
