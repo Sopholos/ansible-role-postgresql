@@ -10,9 +10,27 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-echo "\ArchiveFullPath: '$ArchiveFullPath' \ArchiveName: '$ArchiveName' \BackupPath: '$BackupPath'"
+echo "\ArchiveFullPath: '$ArchiveFullPath' \ArchiveName: '$ArchiveName' \BackupPath: '$BackupPath' \s3Endpoint: '$s3Endpoint' \s3Profile: '$s3Profile'"
 
 backwal=$BackupPath
+
+if [[ -n "$s3Endpoint" || -n "$s3Profile" || "$BackupPath" == s3://* ]]; then
+    walFile="${backwal}/${ArchiveName}"
+    awsArgs=("s3" "cp" "$walFile" "$ArchiveFullPath")
+
+    if [[ -n "$s3Endpoint" ]]; then
+        awsArgs+=("--endpoint-url" "$s3Endpoint")
+    fi
+
+    if [[ -n "$s3Profile" ]]; then
+        awsArgs+=("--profile" "$s3Profile")
+    fi
+
+    aws "${awsArgs[@]}"
+
+	exit $?;
+fi
+
 ext7z=".7z"
 walFile=$backwal/$ArchiveName
 walFile7z=$walFile$ext7z
@@ -37,11 +55,11 @@ if [ -f $walFile7z ]; then
 	tmpdst="/tmp/wal_copy"
 	echo Copying $walFile7z $tmpdst
 	/bin/cp -rf -T $walFile7z $tmpdst
-	
+
 	ret=$?
 	if [ $ret -ne 0 ]; then
 		echo failed to copy $walFile7z
-		exit $ret;	
+		exit $ret;
 	fi
 
 	tmpfold="/tmp/wal_copy_ex"
@@ -55,7 +73,7 @@ if [ -f $walFile7z ]; then
 	ret=$?
 	if [ $ret -ne 0 ]; then
 		echo failed to unarchive $walFile7z
-		exit $ret;	
+		exit $ret;
 	fi
 
 	source=$tmpfold/$ArchiveName

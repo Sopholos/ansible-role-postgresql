@@ -1,0 +1,6 @@
+{% for s3 in postgresql_backup_s3 %}
+[{{ s3.profile }}]
+region={{ s3.region | default('ru-central1') }}
+output=json
+endpoint_url={{ s3.endpoint }}
+{% endfor %}

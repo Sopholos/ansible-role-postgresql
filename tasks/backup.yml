@@ -9,13 +9,17 @@
   ansible.builtin.package:
     name: p7zip
   when: ansible_os_family == 'RedHat'
-  
+
 - name: prepare | powershell
   import_tasks: prepare-powershell.yaml
 
 - name: prepare | postgres-client
   import_tasks: prepare-postgres-client.yaml
   when: postgresql_backup_install_client is defined and postgresql_backup_install_client
+
+- name: prepare | s3
+  import_tasks: backup_s3.yml
+  when: postgresql_backup_s3 is defined
 
 - name: prepare | copy PS scripts
   copy:
@@ -25,7 +29,8 @@
     group: root
     mode: u+rwx,g=rx,o=rx
   with_items:
-    - { src: postgre_wal_read.sh, dest: /usr/local/bin/postgre_wal_read.ps1 }
+    - { src: postgre_wal_read.ps1, dest: /usr/local/bin/postgre_wal_read.ps1 }
+    - { src: postgre_wal_read.sh, dest: /usr/local/bin/postgre_wal_read.sh }
     - { src: postgre_wal_write.ps1, dest: /usr/local/bin/postgre_wal_write.ps1 }
     - { src: postgre_backup_cluster.ps1, dest: /usr/local/bin/postgre_backup_cluster.ps1 }
     - { src: postgre_dump_db.ps1, dest: /usr/local/bin/postgre_dump_db.ps1 }

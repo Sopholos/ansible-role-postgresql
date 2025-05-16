@@ -1,12 +1,11 @@
 #!/snap/bin/powershell -Command
 # Ansible managed
 param(
-	[parameter(Mandatory=$true)]
-		[string]$ArchiveFullPath,
-	[parameter(Mandatory=$true)]
-		[string]$ArchiveName,
-    [parameter(Mandatory=$true)]
-		[string]$BackupPath
+	[parameter(Mandatory=$true)][string]$ArchiveFullPath,
+	[parameter(Mandatory=$true)][string]$ArchiveName,
+	[parameter(Mandatory=$true)][string]$BackupPath,
+	[parameter(Mandatory=$false)][string]$s3Endpoint,
+	[parameter(Mandatory=$false)][string]$s3Profile
 )
 
 $ErrorActionPreference = "Stop"
@@ -64,52 +63,71 @@ function Expand-7ZipItem {
 
 try
 {
-	#$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
-	#$logsdir = "t:\logs\"
-	#Start-Transcript -Path (Join-Path $logsdir -ChildPath "wal_read$($num)_$date.log")
-
 	Write-Host $ArchiveFullPath
 	Write-Host $ArchiveName
 
-    if (-not (Test-Path -Path $backwal -PathType Container)) {
-        throw "$backwal folder does not exists"
-    }
+	if ($s3Endpoint -or $s3Profile -or $BackupPath.StartsWith('s3://')) {
+		$walFile = $backwal + '/' + $ArchiveName
+		$awsArgs = @(
+			"s3", "cp",
+			$walFile,
+			$ArchiveFullPath
+		)
 
-    $walFile = Join-Path $backwal $ArchiveName
+		if ($s3Endpoint) {
+			$awsArgs +="--endpoint-url", $s3Endpoint
+		}
 
-    if (Test-Path -Path $walFile -PathType Leaf) {
-		Write-Host "$walFile copying to $ArchiveFullPath"
-        Copy-Item -Path $walFile -Destination $ArchiveFullPath
-        return
-    }
+		if ($s3Profile) {
+			$awsArgs += "--profile", $s3Profile
+		}
 
-    $walFile = "$walFile.7z"
-    if (Test-Path -Path $walFile -PathType Leaf) {
-		Write-Host "$walFile expanding to $ArchiveFullPath"
-		Expand-7ZipItem -Source $walFile -Target $ArchiveFullPath
-        return
-    }
+		aws @awsArgs
 
-	$walFile = Join-Path $backwal "oldstorage" $ArchiveName
+		if ($LASTEXITCODE -ne 0) { throw "aws s3 cp exited with code $LASTEXITCODE." }
 
-    if (Test-Path -Path $walFile -PathType Leaf) {
-		Write-Host "$walFile copying to $ArchiveFullPath"
-        Copy-Item -Path $walFile -Destination $ArchiveFullPath
-        return
-    }
+		return
+	}
+	else {
+		if (-not (Test-Path -Path $backwal -PathType Container)) {
+			throw "$backwal folder does not exists"
+		}
 
-    $walFile = "$walFile.7z"
-    if (Test-Path -Path $walFile -PathType Leaf) {
-		Write-Host "$walFile expanding to $ArchiveFullPath"
-		Expand-7ZipItem -Source $walFile -Target $ArchiveFullPath
-        return
-    }
+		$walFile = Join-Path $backwal $ArchiveName
 
-	throw "$ArchiveName does not exists at $backwal"
+		if (Test-Path -Path $walFile -PathType Leaf) {
+			Write-Host "$walFile copying to $ArchiveFullPath"
+			Copy-Item -Path $walFile -Destination $ArchiveFullPath
+			return
+		}
+
+		$walFile = "$walFile.7z"
+		if (Test-Path -Path $walFile -PathType Leaf) {
+			Write-Host "$walFile expanding to $ArchiveFullPath"
+			Expand-7ZipItem -Source $walFile -Target $ArchiveFullPath
+			return
+		}
+
+		$walFile = Join-Path $backwal "oldstorage" $ArchiveName
+
+		if (Test-Path -Path $walFile -PathType Leaf) {
+			Write-Host "$walFile copying to $ArchiveFullPath"
+			Copy-Item -Path $walFile -Destination $ArchiveFullPath
+			return
+		}
+
+		$walFile = "$walFile.7z"
+		if (Test-Path -Path $walFile -PathType Leaf) {
+			Write-Host "$walFile expanding to $ArchiveFullPath"
+			Expand-7ZipItem -Source $walFile -Target $ArchiveFullPath
+			return
+		}
+
+		throw "$ArchiveName does not exists at $backwal"
+	}
 }
 catch {
     throw
 }
 finally {
-	#Stop-Transcript
 }

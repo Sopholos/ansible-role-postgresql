@@ -1,0 +1,36 @@
+---
+- name: prepare | install awscli via snap
+  community.general.snap:
+    name: aws-cli
+    classic: true
+
+- name: prepare | ensure AWS config directory exists
+  ansible.builtin.file:
+    path: "~/.aws"
+    state: directory
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: "0700"
+  become: true
+  become_user: "{{ postgresql_user }}"
+
+- name: prepare | configure AWS config for each backup set
+  ansible.builtin.template:
+    src: aws_config.j2
+    dest: "~/.aws/config"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: "0600"
+  become: true
+  become_user: "{{ postgresql_user }}"
+
+- name: prepare | configure AWS credentials for each backup set
+  ansible.builtin.template:
+    src: aws_credentials.j2
+    dest: "~/.aws/credentials"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: "0600"
+  no_log: true
+  become: true
+  become_user: "{{ postgresql_user }}"
