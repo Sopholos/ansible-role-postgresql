@@ -5,18 +5,26 @@ param(
 	[parameter(Mandatory=$false)][string]$PostgresqlHost = "localhost",
 	[parameter(Mandatory=$false)][int]$PostgresqlPort = 5432,
 	[parameter(Mandatory=$false)][string]$Database = "postgres",
-	[parameter(Mandatory=$false)][string]$PostgresqlUser
+	[parameter(Mandatory=$false)][string]$PostgresqlUser,
+	[parameter(Mandatory=$false)][string]$PostgresqlPassword
 )
 $ErrorActionPreference = "Stop"
-Write-Host "Executing against $Database query $Query"
+Write-Host "Executing against $($PostgresqlHost):$PostgresqlPort/$Database query $Query"
 
 $args = "--no-psqlrc", "--variable=ON_ERROR_STOP=1", "--pset=pager=off", "--tuples-only"
-$args += "--host=$PostgresqlHost"
-$args += "--port=$PostgresqlPort"
-if ($PostgresqlUser -ne $null) {
-	$args += "--username=$PostgresqlUser"
+
+$creds = ""
+if ($PostgresqlUser) {
+	if ($PostgresqlPassword) {
+		$creds = "${PostgresqlUser}:$PostgresqlPassword@"
+	}
+	else {
+		$creds = "$PostgresqlUser@"
+	}
 }
-$args += "--dbname=$Database"
+
+$args += "--dbname=postgresql://${creds}${PostgresqlHost}:$PostgresqlPort/$Database"
+
 $args += "--command=$Query"
 
 $result = &psql @args

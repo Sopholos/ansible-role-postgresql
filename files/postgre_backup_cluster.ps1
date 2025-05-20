@@ -2,6 +2,8 @@
 # Ansible managed
 param(
 	[parameter(Mandatory=$true)][string]$PostgresqlUser,
+	[parameter(Mandatory=$false)][string]$QueryPostgresqlUser,
+	[parameter(Mandatory=$false)][string]$QueryPostgresqlPassword,
 	[parameter(Mandatory=$true)][string]$PostgresqlHost,
 	[parameter(Mandatory=$true)][int]$PostgresqlPort,
 	[parameter(Mandatory=$false)][bool]$TestArchive = $true,
@@ -13,7 +15,8 @@ try
 	if ((/usr/local/bin/Get-PGIsInRecovery `
 			-PostgresqlHost $PostgresqlHost `
 			-PostgresqlPort $PostgresqlPort `
-			-PostgresqlUser $PostgresqlUser) -eq $true) {
+			-PostgresqlUser $QueryPostgresqlUser `
+			-PostgresqlPassword $QueryPostgresqlPassword) -eq $true) {
 		Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
 		return;
 	}
@@ -26,7 +29,7 @@ try
 	$date = Get-Date -Format "yyyy-MM-dd_HH-mm_ss.fff"
 	$BackupPath = Join-Path $BackupFolder -ChildPath "$date.7zbk"
 
-	pg_basebackup `
+	&pg_basebackup `
 		--progress `
 		--username=$PostgresqlUser `
 		--pgdata=$BackupPath `
@@ -59,5 +62,5 @@ try
 	$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | Set-Content $doneFile
 }
 catch {
-    throw
+	throw
 }
