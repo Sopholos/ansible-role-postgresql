@@ -79,3 +79,51 @@ postgresql_job_cleanup: "/usr/local/bin/Remove-Backup.ps1"
 
 # import role from https://github.com/Sopholos/ansible_role_cron.git
 postgresql_crontab_role_path: ../../../linux/role_cron
+
+# postgres_restore:
+#   restore_sets:
+#     - name: "Postgre_{{ postgresql_version }}-{{ postgresql_cluster_name }}_testdb_restore"
+#       cron:
+#         weekday: "*"
+#         hour: 4
+#         minute: 0
+#         disabled: true
+#         user: "{{ postgresql_user }}"
+#       dumps:
+#         - destinationDB: untouched_testdb
+#           backupFolder: "{{ postgres_restore_backupFolder }}"
+#           s3Bucket: "{{ s3_bucket_backup_dbs.bucket }}"
+#           s3Profile: pg
+#           s3Endpoint: "{{ s3_http_endpoint }}"
+#           backupFilter: "?starts_with(Key, '{{ postgres_restore_backupFolder }}/testdb_') && ends_with(Key, '.dmbk.done')"
+#           sql: []
+
+# postgres_backup:
+#   backup_sets:
+#     - name: "Postgre {{ postgresql_version }}-{{ postgresql_cluster_name }} testdb dump"
+#       cron:
+#         weekday: "*"
+#         hour: 1
+#         minute: 0
+#       dump:
+#         user: "backup_dumper"
+#         password: "{{ postgres_backup_dumper_password }}"
+#         host: localhost
+#         port: 5432
+#         database: testdb
+#         backupFolder: "s3://{{ s3_bucket_backup_dbs.bucket }}/{{ common_cluster_name }}/{{ postgresql_version }}-{{ postgresql_cluster_name }}/dump"
+#         s3Profile: pg
+#         s3Endpoint: "{{ s3_http_endpoint }}"
+
+#   backup_cluster_sets:
+#     - name: "Postgre {{ postgresql_version }}-{{ postgresql_cluster_name }}"
+#       cron:
+#         weekday: "*"
+#         hour: 4
+#         minute: 0
+#         # disabled: true
+#       cluster:
+#         user: replicator
+#         host: localhost
+#         port: 5432
+#         backupFolder: "{{ postgresql_archive_write_dir }}/full"
