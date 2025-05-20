@@ -30,7 +30,15 @@
   set_fact:
     cron_pure: "{{ item.cron }}"
     cron_extra:
-      job: "{{ postgresql_job_backup_db }} -Database {{ item.dump.database }} -PostgresqlUser {{ item.dump.user }} -PostgresqlPassword {{ item.dump.password }} -PostgresqlHost {{ item.dump.host }} -PostgresqlPort {{ item.dump.port }} -BackupFolder {{ item.dump.backupFolder }}"
+      job: "{{ postgresql_job_backup_db }}
+        -Database {{ item.dump.database }}
+        -PostgresqlUser {{ item.dump.user }}
+        -PostgresqlPassword {{ item.dump.password }}
+        -PostgresqlHost {{ item.dump.host }}
+        -PostgresqlPort {{ item.dump.port }}
+        -BackupFolder {{ item.dump.backupFolder }}
+        -s3Profile {{ item.dump.s3Profile | default ('\\$null') }}
+        -s3Endpoint {{ item.dump.s3Endpoint | default ('\\$null') }}"
       name: "Backup-{{ item.name }}"
       cron_file: postgres_backup
       tag: "{{ item.tag | default('CRON_PSQL_BACKUP') }}"
