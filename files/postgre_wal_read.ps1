@@ -23,7 +23,7 @@ function Expand-7ZipItem {
 
 	try
 	{
-        $7zipPath = "/usr/lib/p7zip/7z"
+		$7zipPath = "/usr/lib/p7zip/7z"
 		if (Test-Path -Path $Target -PathType Container) {
 			$exeargs = "x ""$Source"""
 			$exeargs = "$exeargs -o""$Target"" $UnComressionArgs"
@@ -34,11 +34,11 @@ function Expand-7ZipItem {
 			}
 		}
 		else {
-			$tmpdst =  "/tmp/wal_copy"
+			$tmpdst = "/tmp/wal_copy"
 			[System.IO.File]::Copy($Source, $tmpdst, $true);
 			$Source = $tmpdst
 
-			$tmpfold =  "/tmp/wal_copy_ex"
+			$tmpfold = "/tmp/wal_copy_ex"
 			if (-not (Test-Path -Path $tmpfold -PathType Container)) {
 				New-Item -ItemType Directory $tmpfold
 			}
@@ -127,7 +127,7 @@ try
 	}
 }
 catch {
-    throw
+	throw
 }
 finally {
 }

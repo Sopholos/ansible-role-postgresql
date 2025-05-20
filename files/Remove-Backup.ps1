@@ -1,22 +1,22 @@
 #!/snap/bin/powershell -Command
 # Ansible managed
 param(
-    [parameter(Mandatory=$true)][string]$BackupFolder,
-    [parameter(Mandatory=$true)][int]$Days,
-    [parameter(Mandatory=$true)][AllowNull()][System.Nullable[int]]$SaveEachMonthDay
+	[parameter(Mandatory=$true)][string]$BackupFolder,
+	[parameter(Mandatory=$true)][int]$Days,
+	[parameter(Mandatory=$true)][AllowNull()][System.Nullable[int]]$SaveEachMonthDay
 )
 
 $ErrorActionPreference = "Stop"
 
 foreach ($file in Get-Childitem $BackupFolder -Recurse -File) {
-    if ($SaveEachMonthDay -ne $null) {
-        if ($file.LastWriteTime.Day -eq $SaveEachMonthDay) {
-            continue
-        }
-    }
-    if ($file.lastWriteTime -lt (Get-Date).AddDays($Days)) {
-        Remove-Item $file -Verbose
-    }
+	if ($SaveEachMonthDay -ne $null) {
+		if ($file.LastWriteTime.Day -eq $SaveEachMonthDay) {
+			continue
+		}
+	}
+	if ($file.lastWriteTime -lt (Get-Date).AddDays($Days)) {
+		Remove-Item $file -Verbose
+	}
 }
 
 # delete empty dirs

@@ -5,7 +5,7 @@ param(
 	[parameter(Mandatory=$true)][string]$ArchiveName,
 	[parameter(Mandatory=$true)][string]$BackupPath,
 	[parameter(Mandatory=$false)][string]$s3Endpoint,
-    [parameter(Mandatory=$false)][string]$s3Profile
+	[parameter(Mandatory=$false)][string]$s3Profile
 )
 $ErrorActionPreference = "Stop"
 $backwal = $BackupPath
@@ -44,5 +44,5 @@ try
 	}
 }
 catch {
-    throw
+	throw
 }
