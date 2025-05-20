@@ -1,32 +1,51 @@
 #! /usr/bin/env bash
 # Ansible managed
 
+# Set error handling
+set -e
+
 while [ $# -gt 0 ]; do
-    if [[ $1 == "-"* ]]; then
-        v="${1/-/}"
-        declare "$v"="$2"
-        shift
-    fi
-    shift
+	if [[ $1 == "-"* ]]; then
+		v="${1/-/}"
+		declare "$v"="$2"
+		shift
+	fi
+	shift
 done
 
 echo "\ArchiveFullPath: '$ArchiveFullPath' \ArchiveName: '$ArchiveName' \BackupPath: '$BackupPath' \s3Endpoint: '$s3Endpoint' \s3Profile: '$s3Profile'"
 
+# Validate required parameters
+if [[ -z "$ArchiveFullPath" ]]; then
+	echo "Missing required parameter ArchiveFullPath"
+	exit 1
+fi
+
+if [[ -z "$ArchiveName" ]]; then
+	echo "Missing required parameter ArchiveName"
+	exit 1
+fi
+
+if [[ -z "$BackupPath" ]]; then
+	echo "Missing required parameter BackupPath"
+	exit 1
+fi
+
 backwal=$BackupPath
 
 if [[ -n "$s3Endpoint" || -n "$s3Profile" || "$BackupPath" == s3://* ]]; then
-    walFile="${backwal}/${ArchiveName}"
-    awsArgs=("s3" "cp" "$walFile" "$ArchiveFullPath")
+	walFile="${backwal}/${ArchiveName}"
+	awsArgs=("s3" "cp" "$walFile" "$ArchiveFullPath")
 
-    if [[ -n "$s3Endpoint" ]]; then
-        awsArgs+=("--endpoint-url" "$s3Endpoint")
-    fi
+	if [[ -n "$s3Endpoint" ]]; then
+		awsArgs+=("--endpoint-url" "$s3Endpoint")
+	fi
 
-    if [[ -n "$s3Profile" ]]; then
-        awsArgs+=("--profile" "$s3Profile")
-    fi
+	if [[ -n "$s3Profile" ]]; then
+		awsArgs+=("--profile" "$s3Profile")
+	fi
 
-    aws "${awsArgs[@]}"
+	aws "${awsArgs[@]}"
 
 	exit $?;
 fi
@@ -79,7 +98,7 @@ if [ -f $walFile7z ]; then
 	source=$tmpfold/$ArchiveName
 	/bin/mv -f $source $ArchiveFullPath
 
-    exit $?;
+	exit $?;
 fi
 
 echo file not found
