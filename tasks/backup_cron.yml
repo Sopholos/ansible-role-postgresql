@@ -7,7 +7,16 @@
   set_fact:
     cron_pure: "{{ item.cron }}"
     cron_extra:
-      job: "{{ postgresql_job_backup_cluster }} -PostgresqlUser {{ item.cluster.user }} -PostgresqlHost {{ item.cluster.host }} -PostgresqlPort {{ item.cluster.port }} -BackupFolder {{ item.cluster.backupFolder }} -TestArchive \\${{ item.cluster.testArchive | default(true) }} "
+      job: "{{ postgresql_job_backup_cluster }}
+        -PostgresqlUser {{ item.cluster.user }}
+        -PostgresqlHost {{ item.cluster.host }}
+        -PostgresqlPort {{ item.cluster.port }}
+        -BackupFolder {{ item.cluster.backupFolder }}
+        -Compress {{ item.cluster.compress | default(1) }}
+        -s3TempPath {{ item.cluster.s3TempPath | default ('\\$null') }}
+        -s3Profile {{ item.cluster.s3Profile | default ('\\$null') }}
+        -s3Endpoint {{ item.cluster.s3Endpoint | default ('\\$null') }}
+        -TestArchive \\${{ item.cluster.testArchive | default(true) }}"
       name: "Backup-{{ item.name }}"
       cron_file: postgres_backup
       tag: "{{ item.tag | default('CRON_PSQL_BACKUP') }}"

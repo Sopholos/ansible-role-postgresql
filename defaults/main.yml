@@ -127,3 +127,19 @@ postgresql_crontab_role_path: ../../../linux/role_cron
 #         host: localhost
 #         port: 5432
 #         backupFolder: "{{ postgresql_archive_write_dir }}/full"
+
+#   - name: "Postgre {{ postgresql_version }}-{{ postgresql_cluster_name }}-s3"
+#     cron:
+#       weekday: "*"
+#       hour: 4
+#       minute: 0
+#       # disabled: true
+#     cluster:
+#       user: replicator
+#       host: localhost
+#       port: 5432
+#       backupFolder: "s3://{{ s3_bucket_backup_dbs.bucket }}/{{ common_cluster_name }}/{{ postgresql_version }}-{{ postgresql_cluster_name }}/full"
+#       compress: 1
+#       s3TempPath: /tmp/dbbackupcluster
+#       s3Profile: pg
+#       s3Endpoint: "{{ s3_http_endpoint }}"
