@@ -43,6 +43,9 @@
         -Database {{ item.dump.database }}
         -PostgresqlUser {{ item.dump.user }}
         -PostgresqlPassword {{ item.dump.password }}
+        -QueryPostgresqlDatabase {{ item.dump.query_database | default ('\\$null') }}
+        -QueryPostgresqlUser {{ item.dump.query_user | default ('\\$null') }}
+        -QueryPostgresqlPassword {{ item.dump.query_password | default ('\\$null') }}
         -PostgresqlHost {{ item.dump.host }}
         -PostgresqlPort {{ item.dump.port }}
         -BackupFolder {{ item.dump.backupFolder }}

@@ -5,6 +5,7 @@ param(
 	[parameter(Mandatory=$true)][string]$PostgresqlPassword,
 	[parameter(Mandatory=$false)][string]$QueryPostgresqlUser,
 	[parameter(Mandatory=$false)][string]$QueryPostgresqlPassword,
+	[parameter(Mandatory=$false)][string]$QueryPostgresqlDatabase,
 	[parameter(Mandatory=$true)][string]$PostgresqlHost,
 	[parameter(Mandatory=$true)][int]$PostgresqlPort,
 	[parameter(Mandatory=$true)][string]$Database,
@@ -24,6 +25,7 @@ try
 	if ((/usr/local/bin/Get-PGIsInRecovery `
 			-PostgresqlHost $PostgresqlHost `
 			-PostgresqlPort $PostgresqlPort `
+			-Database $QueryPostgresqlDatabase `
 			-PostgresqlUser $QueryPostgresqlUser `
 			-PostgresqlPassword $QueryPostgresqlPassword) -eq $true) {
 		Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
@@ -54,7 +56,8 @@ try
 			$awsArgs += "--profile", $s3Profile
 		}
 
-		&pg_dump $pgArgs | &aws @awsArgs
+		Write-Host "&pg_dump $pgArgs | &aws $awsArgs"
+		&pg_dump $pgArgs | &aws $awsArgs
 
 		if ($LASTEXITCODE -ne 0) { throw "aws s3 cp exited with code $LASTEXITCODE." }
 		Write-Host "Backed up $backupFile"
@@ -75,7 +78,8 @@ try
 			$awsArgs += "--profile", $s3Profile
 		}
 
-		&aws @awsArgs |	&pg_restore $pgArgs
+		Write-Host "bash -c ""aws $awsArgs | pg_restore $pgArgs"""
+		bash -c "aws $awsArgs | pg_restore $pgArgs"
 
 		if ($LASTEXITCODE -ne 0) { throw "pg_restore exited with code $LASTEXITCODE." }
 		Write-Host "Validated $backupFile"
@@ -94,7 +98,7 @@ try
 			$awsArgs += "--profile", $s3Profile
 		}
 
-		$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | &aws @awsArgs
+		$(Get-Date -format "yyyy-MM-dd HH:mm:ss") | &aws $awsArgs
 
 		if ($LASTEXITCODE -ne 0) { throw "aws s3 cp done file exited with code $LASTEXITCODE." }
 		Write-Host "Wrote $doneFile"
@@ -111,6 +115,7 @@ try
 			"--file=$backupFile"
 		)
 
+		Write-Host "&pg_dump $pgArgs"
 		&pg_dump $pgArgs
 
 		if ($LASTEXITCODE -ne 0) { throw "pg_dump exited with code $LASTEXITCODE." }
@@ -121,6 +126,7 @@ try
 			$backupFile
 		)
 
+		Write-Host "&pg_restore $pgArgs"
 		&pg_restore $pgArgs
 
 		if ($LASTEXITCODE -ne 0) { throw "pg_restore exited with code $LASTEXITCODE." }
