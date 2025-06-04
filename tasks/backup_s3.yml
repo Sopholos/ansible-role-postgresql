@@ -12,7 +12,10 @@
     group: "{{ postgresql_group }}"
     mode: "0700"
   become: true
-  become_user: "{{ postgresql_user }}"
+  become_user: "{{ item }}"
+  loop:
+    - '{{ postgresql_user }}'
+    - root
 
 - name: prepare | configure AWS config for each backup set
   ansible.builtin.template:
@@ -22,7 +25,10 @@
     group: "{{ postgresql_group }}"
     mode: "0600"
   become: true
-  become_user: "{{ postgresql_user }}"
+  become_user: "{{ item }}"
+  loop:
+    - '{{ postgresql_user }}'
+    - root
 
 - name: prepare | configure AWS credentials for each backup set
   ansible.builtin.template:
@@ -33,4 +39,7 @@
     mode: "0600"
   no_log: true
   become: true
-  become_user: "{{ postgresql_user }}"
+  become_user: "{{ item }}"
+  loop:
+    - '{{ postgresql_user }}'
+    - root
