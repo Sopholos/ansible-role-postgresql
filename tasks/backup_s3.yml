@@ -3,7 +3,6 @@
   community.general.snap:
     name: aws-cli
     classic: true
-  notify: reload postgresql
 
 - name: prepare | get aws cli path
   command: which aws
@@ -17,7 +16,6 @@
     dest: /usr/bin/aws
     state: link
   when: aws_cli_path.stdout != "/usr/bin/aws"
-  notify: reload postgresql
 
 - name: prepare | ensure AWS config directory exists
   ansible.builtin.file:
