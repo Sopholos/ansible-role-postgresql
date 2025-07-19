@@ -26,8 +26,8 @@ function Find-Dump {
 			"s3api", "list-objects-v2",
 			"--bucket", $s3Bucket,
 			"--prefix", $BackupFolder,
-			"--query", "reverse(sort_by(Contents[$filter], &LastModified))[:1].Key",
-			"--output", "text"
+			"--query", "reverse(sort_by(sort_by(Contents[$filter], &Key), &LastModified))[:1].Key",
+			"--output", "json"
 		)
 		if ($s3Endpoint) {
 			$awsArgs +="--endpoint-url", $s3Endpoint
@@ -36,14 +36,22 @@ function Find-Dump {
 			$awsArgs += "--profile", $s3Profile
 		}
 
-		$file = &aws @awsArgs
+		Write-Host "&aws $awsArgs"
+		$file = &aws $awsArgs
 
 		if ($LASTEXITCODE -ne 0) { throw "aws s3api exited with code $LASTEXITCODE." }
 
 		if (-not $file) {
-			if ($LASTEXITCODE -ne 0) { throw "aws s3api not found $s3Bucket/$BackupFolder/$filter." }
+			throw "aws s3api not found $s3Bucket/$BackupFolder/$filter."
 		}
-		return $file -replace '\.done$', ''
+		Write-Host "aws found: $file"
+		$file = $file | ConvertFrom-Json | Select-Object -Index 0
+		if (-not $file) {
+			throw "aws s3api not found $s3Bucket/$BackupFolder/$filter."
+		}
+		$result = $file -replace '\.done$', ''
+		Write-Host "result: $result"
+		return $result
 	}
 
 	$file = Get-ChildItem $path -Filter $filter | Sort-Object LastWriteTime | Select-Object -last 1
