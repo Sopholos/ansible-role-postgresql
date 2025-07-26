@@ -3,7 +3,7 @@
 
 $ErrorActionPreference = "Stop"
 
-if ((/usr/local/bin/Get-PGIsInRecovery) -eq $true) {
+if ((/usr/local/bin/Get-PGIsInRecovery -PostgresqlPort "{{ postgresql_port }}") -eq $true) {
     Write-Host -ForegroundColor Yellow "Postgresql is in restoring state"
     return;
 }
@@ -12,6 +12,7 @@ if ((/usr/local/bin/Get-PGIsInRecovery) -eq $true) {
 {% for dump in item.dumps %}
 
 /usr/local/bin/Restore-LatestDump.ps1 `
+    -PostgresqlPort "{{ postgresql_port }}" `
     -DestinationDB "{{ dump.destinationDB }}" `
     -BackupFolder "{{ dump.backupFolder }}" `
     -s3TempPath {{ dump.s3TempPath | default('$null') }} `
@@ -29,6 +30,7 @@ if ((/usr/local/bin/Get-PGIsInRecovery) -eq $true) {
 {% for copy in item.copies %}
 
 /usr/local/bin/Restore-DBFromTemplate.ps1 `
+    -PostgresqlPort "{{ postgresql_port }}" `
     -DestinationDB "{{ copy.destinationDB }}" `
     -SourceDB "{{ copy.sourceDB }}" `
     -QueryFile "{{ postgres_cron_template_script_path }}/copy_{{ item.name }}_{{ copy.destinationDB }}.sql"

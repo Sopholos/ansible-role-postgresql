@@ -1,6 +1,7 @@
 #!/snap/bin/powershell -Command
 # Ansible managed
 param(
+	[parameter(Mandatory=$false)][int]$PostgresqlPort = 5432,
 	[parameter(Mandatory=$true)][string]$DestinationDB,
 	[parameter(Mandatory=$true)][string]$BackupFolder,
 	[parameter(Mandatory=$true)][string]$BackupFileFilter,
@@ -122,7 +123,7 @@ function Restore-DB {
 				$exitcode = $LASTEXITCODE
 			}
 			finally {
-				Remove-Item $s3TempPath\* -Recurse -Force -Verbose
+				Remove-Item $s3TempPath\* -Recurse -Force -Verbose -ProgressAction SilentlyContinue
 			}
 		}
 		else {
@@ -176,7 +177,9 @@ try {
 	Write-Host $success
 
 	if ($null -ne $QueryFile) {
-		/usr/local/bin/Invoke-PgSQLFile.ps1 -File $QueryFile -Database $DestinationDB
+		/usr/local/bin/Invoke-PgSQLFile.ps1 `
+			-PostgresqlPort $PostgresqlPort `
+			-File $QueryFile -Database $DestinationDB
 	}
 
 	if ($success) {
