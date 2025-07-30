@@ -81,7 +81,7 @@ function Restore-DB {
 		Write-Error "Creating $destdb failed"
 	}
 
-	$cpuCount = [Environment]::ProcessorCount - 2
+	$cpuCount = [math]::Max([Environment]::ProcessorCount - 2, 1)
 
 	if ($s3Bucket -or $s3Endpoint -or $s3Profile) {
 		if ($s3TempPath) {
