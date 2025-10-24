@@ -29,7 +29,9 @@
     login_unix_socket: "{{ postgresql_user_item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
     port: "{{ postgresql_port | default(omit) }}"
   with_items: '{{ postgresql_user_item.groups }}'
-  when: postgresql_user_item.groups is defined
+  when:
+    - postgresql_user_item.groups is defined
+    - (postgresql_user_item.state | default('present')) != 'absent'
   become: true
   become_user: "{{ postgresql_user }}"
   environment:
